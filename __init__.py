@@ -101,6 +101,7 @@ comfy_ui_commit_date = ""
 
 comfy_path = os.path.dirname(folder_paths.__file__)
 custom_nodes_path = folder_paths.folder_names_and_paths['custom_nodes'][0]
+custom_nodes_paths = folder_paths.folder_names_and_paths['custom_nodes']
 js_path = os.path.join(comfy_path, "web", "extensions")
 
 comfyui_manager_path = os.path.dirname(__file__)
@@ -630,26 +631,29 @@ def check_a_custom_node_installed(item, do_fetch=False, do_update_check=True, do
             url = url[:-1]
 
         dir_name = os.path.splitext(os.path.basename(url))[0].replace(".git", "")
-        dir_path = os.path.join(custom_nodes_path, dir_name)
-        if os.path.exists(dir_path):
-            try:
-                if do_update_check and git_repo_has_updates(dir_path, do_fetch, do_update):
-                    item['installed'] = 'Update'
-                elif sys.__comfyui_manager_is_import_failed_extension(dir_name):
-                    item['installed'] = 'Fail'
-                else:
-                    item['installed'] = 'True'
-            except:
-                if sys.__comfyui_manager_is_import_failed_extension(dir_name):
-                    item['installed'] = 'Fail'
-                else:
-                    item['installed'] = 'True'
+        for _custom_nodes_path in custom_nodes_paths:
+            dir_path = os.path.join(_custom_nodes_path, dir_name)
+            if os.path.exists(dir_path):
+                try:
+                    if do_update_check and git_repo_has_updates(dir_path, do_fetch, do_update):
+                        item['installed'] = 'Update'
+                    elif sys.__comfyui_manager_is_import_failed_extension(dir_name):
+                        item['installed'] = 'Fail'
+                    else:
+                        item['installed'] = 'True'
+                except:
+                    if sys.__comfyui_manager_is_import_failed_extension(dir_name):
+                        item['installed'] = 'Fail'
+                    else:
+                        item['installed'] = 'True'
+                break
 
-        elif os.path.exists(dir_path + ".disabled"):
-            item['installed'] = 'Disabled'
+            elif os.path.exists(dir_path + ".disabled"):
+                item['installed'] = 'Disabled'
+                break
 
-        else:
-            item['installed'] = 'False'
+            else:
+                item['installed'] = 'False'
 
     elif item['install_type'] == 'copy' and len(item['files']) == 1:
         dir_name = os.path.basename(item['files'][0])
@@ -968,38 +972,39 @@ def get_current_snapshot():
     file_custom_nodes = []
 
     # Get custom nodes hash
-    for path in os.listdir(custom_nodes_path):
-        fullpath = os.path.join(custom_nodes_path, path)
+    for __custom_nodes_path in custom_nodes_paths:
+        for path in os.listdir(__custom_nodes_path):
+            fullpath = os.path.join(__custom_nodes_path, path)
 
-        if os.path.isdir(fullpath):
-            is_disabled = path.endswith(".disabled")
+            if os.path.isdir(fullpath):
+                is_disabled = path.endswith(".disabled")
 
-            try:
-                git_dir = os.path.join(fullpath, '.git')
+                try:
+                    git_dir = os.path.join(fullpath, '.git')
 
-                if not os.path.exists(git_dir):
-                    continue
+                    if not os.path.exists(git_dir):
+                        continue
 
-                repo = git.Repo(fullpath)
-                commit_hash = repo.head.commit.hexsha
-                url = repo.remotes.origin.url
-                git_custom_nodes[url] = {
-                    'hash': commit_hash,
+                    repo = git.Repo(fullpath)
+                    commit_hash = repo.head.commit.hexsha
+                    url = repo.remotes.origin.url
+                    git_custom_nodes[url] = {
+                        'hash': commit_hash,
+                        'disabled': is_disabled
+                    }
+
+                except:
+                    print(f"Failed to extract snapshots for the custom node '{path}'.")
+
+            elif path.endswith('.py'):
+                is_disabled = path.endswith(".py.disabled")
+                filename = os.path.basename(path)
+                item = {
+                    'filename': filename,
                     'disabled': is_disabled
                 }
 
-            except:
-                print(f"Failed to extract snapshots for the custom node '{path}'.")
-
-        elif path.endswith('.py'):
-            is_disabled = path.endswith(".py.disabled")
-            filename = os.path.basename(path)
-            item = {
-                'filename': filename,
-                'disabled': is_disabled
-            }
-
-            file_custom_nodes.append(item)
+                file_custom_nodes.append(item)
 
     return {
         'comfyui': comfyui_commit_hash,
