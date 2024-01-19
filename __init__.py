@@ -100,8 +100,8 @@ comfy_ui_revision = "Unknown"
 comfy_ui_commit_date = ""
 
 comfy_path = os.path.dirname(folder_paths.__file__)
-custom_nodes_path = folder_paths.folder_names_and_paths['custom_nodes'][0]
-custom_nodes_paths = folder_paths.folder_names_and_paths['custom_nodes']
+custom_nodes_path = folder_paths.folder_names_and_paths['custom_nodes'][0][0]
+custom_nodes_paths = folder_paths.folder_names_and_paths['custom_nodes'][0]
 js_path = os.path.join(comfy_path, "web", "extensions")
 
 comfyui_manager_path = os.path.dirname(__file__)
