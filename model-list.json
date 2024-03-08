@@ -86,9 +86,9 @@
       "base": "upscale",
       "save_path": "default",
       "description": "4x-AnimeSharp upscaler model",
-      "reference": "https://huggingface.co/konohashinobi4/4xAnimesharp",
+      "reference": "https://huggingface.co/Kim2091/AnimeSharp/",
       "filename": "4x-AnimeSharp.pth",
-      "url": "https://huggingface.co/konohashinobi4/4xAnimesharp/resolve/main/4x-AnimeSharp.pth"
+      "url": "https://huggingface.co/Kim2091/AnimeSharp/resolve/main/4x-AnimeSharp.pth"
     },
     {
       "name": "4x-UltraSharp",
@@ -96,9 +96,9 @@
       "base": "upscale",
       "save_path": "default",
       "description": "4x-UltraSharp upscaler model",
-      "reference": "https://upscale.wiki/wiki/Model_Database",
+      "reference": "https://huggingface.co/Kim2091/UltraSharp/",
       "filename": "4x-UltraSharp.pth",
-      "url": "https://huggingface.co/datasets/Kizi-Art/Upscale/resolve/fa98e357882a23b8e7928957a39462fbfaee1af5/4x-UltraSharp.pth"
+      "url": "https://huggingface.co/Kim2091/UltraSharp/resolve/main/4x-UltraSharp.pth"
     },
     {
       "name": "4x_NMKD-Siax_200k",
@@ -121,11 +121,31 @@
       "url": "https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/8x_NMKD-Superscale_150000_G.pth"
     },
     {
+      "name": "LDSR(Latent Diffusion Super Resolution)",
+      "type": "upscale",
+      "base": "upscale",
+      "save_path": "upscale_models/ldsr",
+      "description": "LDSR upscale model. Through the [a/ComfyUI-Flowty-LDSR](https://github.com/flowtyone/ComfyUI-Flowty-LDSR) extension, the upscale model can be utilized.",
+      "reference": "https://github.com/CompVis/latent-diffusion",
+      "filename": "last.ckpt",
+      "url": "https://heibox.uni-heidelberg.de/f/578df07c8fc04ffbadf3/?dl=1"
+    },
+    {
+      "name": "stabilityai/stable-diffusion-x4-upscaler",
+      "type": "checkpoints",
+      "base": "upscale",
+      "save_path": "checkpoints/upscale",
+      "description": "[3.53GB] This upscaling model is a latent text-guided diffusion model and should be used with SD_4XUpscale_Conditioning and KSampler.",
+      "reference": "https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler",
+      "filename": "x4-upscaler-ema.safetensors",
+      "url": "https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler/resolve/main/x4-upscaler-ema.safetensors"
+    },
+    {
       "name": "Inswapper-fp16 (face swap)",
       "type": "insightface",
       "base" : "inswapper",
       "save_path": "insightface",
-      "description": "[264MB] Checkpoint of the insightface swapper model<BR>(used by ComfyUI-FaceSwap, comfyui-reactor-node, CharacterFaceSwap,<BR>ComfyUI roop and comfy_mtb)",
+      "description": "[264MB] Checkpoint of the insightface swapper model\n(used by ComfyUI-FaceSwap, comfyui-reactor-node, CharacterFaceSwap,\nComfyUI roop and comfy_mtb)",
       "reference": "https://github.com/facefusion/facefusion-assets",
       "filename": "inswapper_128_fp16.onnx",
       "url": "https://github.com/facefusion/facefusion-assets/releases/download/models/inswapper_128_fp16.onnx"
@@ -135,7 +155,7 @@
       "type": "insightface",
       "base" : "inswapper",
       "save_path": "insightface",
-      "description": "[529MB] Checkpoint of the insightface swapper model<BR>(used by ComfyUI-FaceSwap, comfyui-reactor-node, CharacterFaceSwap,<BR>ComfyUI roop and comfy_mtb)",
+      "description": "[529MB] Checkpoint of the insightface swapper model\n(used by ComfyUI-FaceSwap, comfyui-reactor-node, CharacterFaceSwap,\nComfyUI roop and comfy_mtb)",
       "reference": "https://github.com/facefusion/facefusion-assets",
       "filename": "inswapper_128.onnx",
       "url": "https://github.com/facefusion/facefusion-assets/releases/download/models/inswapper_128.onnx"
@@ -185,7 +205,7 @@
       "type": "checkpoints",
       "base": "SVD",
       "save_path": "checkpoints/SVD",
-      "description": "Stable Video Diffusion (SVD) Image-to-Video is a diffusion model that takes in a still image as a conditioning frame, and generates a video from it.<BR>NOTE: 14 frames @ 576x1024",
+      "description": "Stable Video Diffusion (SVD) Image-to-Video is a diffusion model that takes in a still image as a conditioning frame, and generates a video from it.\nNOTE: 14 frames @ 576x1024",
       "reference": "https://huggingface.co/stabilityai/stable-video-diffusion-img2vid",
       "filename": "svd.safetensors",
       "url": "https://huggingface.co/stabilityai/stable-video-diffusion-img2vid/resolve/main/svd.safetensors"
@@ -205,7 +225,7 @@
       "type": "checkpoints",
       "base": "SVD",
       "save_path": "checkpoints/SVD",
-      "description": "Stable Video Diffusion (SVD) Image-to-Video is a diffusion model that takes in a still image as a conditioning frame, and generates a video from it.<BR>NOTE: 25 frames @ 576x1024 ",
+      "description": "Stable Video Diffusion (SVD) Image-to-Video is a diffusion model that takes in a still image as a conditioning frame, and generates a video from it.\nNOTE: 25 frames @ 576x1024 ",
       "reference": "https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt",
       "filename": "svd_xt.safetensors",
       "url": "https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt/resolve/main/svd_xt.safetensors"
@@ -250,6 +270,138 @@
       "filename": "easynegative.safetensors",
       "url": "https://civitai.com/api/download/models/9208"
     },
+
+    {
+      "name": "stabilityai/comfyui_checkpoints/stable_cascade_stage_b.safetensors",
+      "type": "checkpoints",
+      "base": "Stable Cascade",
+      "save_path": "checkpoints/Stable-Cascade",
+      "description": "[4.55GB] Stable Cascade stage_b checkpoints",
+      "reference": "https://huggingface.co/stabilityai/stable-cascade",
+      "filename": "stable_cascade_stage_b.safetensors",
+      "url": "https://huggingface.co/stabilityai/stable-cascade/resolve/main/comfyui_checkpoints/stable_cascade_stage_b.safetensors"
+    },
+    {
+      "name": "stabilityai/comfyui_checkpoints/stable_cascade_stage_c.safetensors",
+      "type": "checkpoints",
+      "base": "Stable Cascade",
+      "save_path": "checkpoints/Stable-Cascade",
+      "description": "[9.22GB] Stable Cascade stage_c checkpoints",
+      "reference": "https://huggingface.co/stabilityai/stable-cascade",
+      "filename": "stable_cascade_stage_c.safetensors",
+      "url": "https://huggingface.co/stabilityai/stable-cascade/resolve/main/comfyui_checkpoints/stable_cascade_stage_c.safetensors"
+    },
+    {
+      "name": "stabilityai/Stable Cascade: stage_a.safetensors (VAE)",
+      "type": "VAE",
+      "base": "Stable Cascade",
+      "save_path": "vae/Stable-Cascade",
+      "description": "[73.7MB] Stable Cascade: stage_a",
+      "reference": "https://huggingface.co/stabilityai/stable-cascade",
+      "filename": "stage_a.safetensors",
+      "url": "https://huggingface.co/stabilityai/stable-cascade/resolve/main/stage_a.safetensors"
+    },
+    {
+      "name": "stabilityai/Stable Cascade: effnet_encoder.safetensors (VAE)",
+      "type": "VAE",
+      "base": "Stable Cascade",
+      "save_path": "vae/Stable-Cascade",
+      "description": "[81.5MB] Stable Cascade: effnet_encoder.\nVAE encoder for stage_c latent.",
+      "reference": "https://huggingface.co/stabilityai/stable-cascade",
+      "filename": "effnet_encoder.safetensors",
+      "url": "https://huggingface.co/stabilityai/stable-cascade/resolve/main/effnet_encoder.safetensors"
+    },
+    {
+      "name": "stabilityai/Stable Cascade: stage_b.safetensors (UNET)",
+      "type": "unet",
+      "base": "Stable Cascade",
+      "save_path": "unet/Stable-Cascade",
+      "description": "[6.25GB] Stable Cascade: stage_b",
+      "reference": "https://huggingface.co/stabilityai/stable-cascade",
+      "filename": "stage_b.safetensors",
+      "url": "https://huggingface.co/stabilityai/stable-cascade/resolve/main/stage_b.safetensors"
+    },
+    {
+      "name": "stabilityai/Stable Cascade: stage_b_bf16.safetensors (UNET)",
+      "type": "unet",
+      "base": "Stable Cascade",
+      "save_path": "unet/Stable-Cascade",
+      "description": "[3.13GB] Stable Cascade: stage_b/bf16",
+      "reference": "https://huggingface.co/stabilityai/stable-cascade",
+      "filename": "stage_b_bf16.safetensors",
+      "url": "https://huggingface.co/stabilityai/stable-cascade/resolve/main/stage_b_bf16.safetensors"
+    },
+    {
+      "name": "stabilityai/Stable Cascade: stage_b_lite.safetensors (UNET)",
+      "type": "unet",
+      "base": "Stable Cascade",
+      "save_path": "unet/Stable-Cascade",
+      "description": "[2.8GB] Stable Cascade: stage_b/lite",
+      "reference": "https://huggingface.co/stabilityai/stable-cascade",
+      "filename": "stage_b_lite.safetensors",
+      "url": "https://huggingface.co/stabilityai/stable-cascade/resolve/main/stage_b_lite.safetensors"
+    },
+    {
+      "name": "stabilityai/Stable Cascade: stage_b_lite.safetensors (UNET)",
+      "type": "unet",
+      "base": "Stable Cascade",
+      "save_path": "unet/Stable-Cascade",
+      "description": "[1.4GB] Stable Cascade: stage_b/bf16,lite",
+      "reference": "https://huggingface.co/stabilityai/stable-cascade",
+      "filename": "stage_b_lite_bf16.safetensors",
+      "url": "https://huggingface.co/stabilityai/stable-cascade/resolve/main/stage_b_lite_bf16.safetensors"
+    },
+    {
+      "name": "stabilityai/Stable Cascade: stage_c.safetensors (UNET)",
+      "type": "unet",
+      "base": "Stable Cascade",
+      "save_path": "unet/Stable-Cascade",
+      "description": "[14.4GB] Stable Cascade: stage_c",
+      "reference": "https://huggingface.co/stabilityai/stable-cascade",
+      "filename": "stage_c.safetensors",
+      "url": "https://huggingface.co/stabilityai/stable-cascade/resolve/main/stage_c.safetensors"
+    },
+    {
+      "name": "stabilityai/Stable Cascade: stage_c_bf16.safetensors (UNET)",
+      "type": "unet",
+      "base": "Stable Cascade",
+      "save_path": "unet/Stable-Cascade",
+      "description": "[7.18GB] Stable Cascade: stage_c/bf16",
+      "reference": "https://huggingface.co/stabilityai/stable-cascade",
+      "filename": "stage_c_bf16.safetensors",
+      "url": "https://huggingface.co/stabilityai/stable-cascade/resolve/main/stage_c_bf16.safetensors"
+    },
+    {
+      "name": "stabilityai/Stable Cascade: stage_c_lite.safetensors (UNET)",
+      "type": "unet",
+      "base": "Stable Cascade",
+      "save_path": "unet/Stable-Cascade",
+      "description": "[4.12GB] Stable Cascade: stage_c/lite",
+      "reference": "https://huggingface.co/stabilityai/stable-cascade",
+      "filename": "stage_c_lite.safetensors",
+      "url": "https://huggingface.co/stabilityai/stable-cascade/resolve/main/stage_c_lite.safetensors"
+    },
+    {
+      "name": "stabilityai/Stable Cascade: stage_c_lite.safetensors (UNET)",
+      "type": "unet",
+      "base": "Stable Cascade",
+      "save_path": "unet/Stable-Cascade",
+      "description": "[2.06GB] Stable Cascade: stage_c/bf16,lite",
+      "reference": "https://huggingface.co/stabilityai/stable-cascade",
+      "filename": "stage_c_lite_bf16.safetensors",
+      "url": "https://huggingface.co/stabilityai/stable-cascade/resolve/main/stage_c_lite_bf16.safetensors"
+    },
+    {
+      "name": "stabilityai/Stable Cascade: text_encoder (CLIP)",
+      "type": "clip",
+      "base": "Stable Cascade",
+      "save_path": "clip/Stable-Cascade",
+      "description": "[1.39GB] Stable Cascade: text_encoder",
+      "reference": "https://huggingface.co/stabilityai/stable-cascade",
+      "filename": "model.safetensors",
+      "url": "https://huggingface.co/stabilityai/stable-cascade/resolve/main/text_encoder/model.safetensors"
+    },
+
     {
       "name": "SDXL-Turbo 1.0 (fp16)",
       "type": "checkpoints",
@@ -340,6 +492,39 @@
       "filename": "sd_xl_offset_example-lora_1.0.safetensors",
       "url": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_offset_example-lora_1.0.safetensors"
     },
+
+    {
+      "name": "SDXL Lightning LoRA (2step)",
+      "type": "lora",
+      "base": "SDXL",
+      "save_path": "loras/SDXL-Lightning",
+      "description": "SDXL Lightning LoRA (2step)",
+      "reference": "https://huggingface.co/ByteDance/SDXL-Lightning",
+      "filename": "sdxl_lightning_2step_lora.safetensors",
+      "url": "https://huggingface.co/ByteDance/SDXL-Lightning/resolve/main/sdxl_lightning_2step_lora.safetensors"
+    },
+    {
+      "name": "SDXL Lightning LoRA (4step)",
+      "type": "lora",
+      "base": "SDXL",
+      "save_path": "loras/SDXL-Lightning",
+      "description": "SDXL Lightning LoRA (4step)",
+      "reference": "https://huggingface.co/ByteDance/SDXL-Lightning",
+      "filename": "sdxl_lightning_4step_lora.safetensors",
+      "url": "https://huggingface.co/ByteDance/SDXL-Lightning/resolve/main/sdxl_lightning_4step_lora.safetensors"
+    },
+    {
+      "name": "SDXL Lightning LoRA (8step)",
+      "type": "lora",
+      "base": "SDXL",
+      "save_path": "loras/SDXL-Lightning",
+      "description": "SDXL Lightning LoRA (8tep)",
+      "reference": "https://huggingface.co/ByteDance/SDXL-Lightning",
+      "filename": "sdxl_lightning_8step_lora.safetensors",
+      "url": "https://huggingface.co/ByteDance/SDXL-Lightning/resolve/main/sdxl_lightning_8step_lora.safetensors"
+    },
+    
+
     {
       "name": "v1-5-pruned-emaonly.ckpt",
       "type": "checkpoints",
@@ -479,7 +664,17 @@
       "reference": "https://huggingface.co/hakurei/waifu-diffusion-v1-4",
       "filename": "kl-f8-anime2.ckpt",
       "url": "https://huggingface.co/hakurei/waifu-diffusion-v1-4/resolve/main/vae/kl-f8-anime2.ckpt"
-    },  
+    },
+    {
+      "name": "OpenAI Consistency Decoder",
+      "type": "VAE",
+      "base": "SD1.5 VAE",
+      "save_path": "vae/openai_consistency_decoder",
+      "description": "[2.3GB] OpenAI Consistency Decoder. Improved decoding for stable diffusion vaes.",
+      "reference": "https://github.com/openai/consistencydecoder",
+      "filename": "decoder.pt",
+      "url": "https://openaipublic.azureedge.net/diff-vae/c9cebd3132dd9c42936d803e33424145a748843c8f716c0814838bdc8a2fe7cb/decoder.pt"
+    },
     {
       "name": "LCM LoRA SD1.5",
       "type": "lora",
@@ -509,6 +704,26 @@
       "reference": "https://huggingface.co/latent-consistency/lcm-lora-sdxl",
       "filename": "pytorch_lora_weights.safetensors",
       "url": "https://huggingface.co/latent-consistency/lcm-lora-sdxl/resolve/main/pytorch_lora_weights.safetensors"
+    },
+    {
+      "name": "Segmind-Vega",
+      "type": "checkpoints",
+      "base": "segmind-vega",
+      "save_path": "checkpoints/segmind-vega",
+      "description": "The Segmind-Vega Model is a distilled version of the Stable Diffusion XL (SDXL), offering a remarkable 70% reduction in size and an impressive 100% speedup while retaining high-quality text-to-image generation capabilities.",
+      "reference": "https://huggingface.co/segmind/Segmind-Vega",
+      "filename": "segmind-vega.safetensors",
+      "url": "https://huggingface.co/segmind/Segmind-Vega/resolve/main/segmind-vega.safetensors"
+    },
+    {
+      "name": "Segmind-VegaRT - Latent Consistency Model (LCM) LoRA of Segmind-Vega",
+      "type": "lora",
+      "base": "segmind-vega",
+      "save_path": "loras/segmind-vega",
+      "description": "Segmind-VegaRT a distilled consistency adapter for Segmind-Vega that allows to reduce the number of inference steps to only between 2 - 8 steps.",
+      "reference": "https://huggingface.co/segmind/Segmind-VegaRT",
+      "filename": "pytorch_lora_weights.safetensors",
+      "url": "https://huggingface.co/segmind/Segmind-VegaRT/resolve/main/pytorch_lora_weights.safetensors"
     },
     {
       "name": "Theovercomer8's Contrast Fix (SD2.1)",
@@ -611,14 +826,124 @@
       "url": "https://huggingface.co/TencentARC/T2I-Adapter/resolve/main/models/t2iadapter_style_sd14v1.pth"
     },
     {
+        "name": "T2I-Adapter XL (lineart) FP16",
+        "type": "T2I-Adapter",
+        "base": "SDXL 1.0",
+        "save_path": "default",
+        "description": "ControlNet T2I-Adapter XL for lineart",
+        "reference": "https://huggingface.co/TencentARC/t2i-adapter-lineart-sdxl-1.0",
+        "filename": "t2i-adapter-lineart-sdxl-1.0.fp16.safetensors",
+        "url": "https://huggingface.co/TencentARC/t2i-adapter-lineart-sdxl-1.0/resolve/main/diffusion_pytorch_model.fp16.safetensors"
+    },
+    {
+        "name": "T2I-Adapter XL (canny) FP16",
+        "type": "T2I-Adapter",
+        "base": "SDXL 1.0",
+        "save_path": "default",
+        "description": "ControlNet T2I-Adapter XL for canny",
+        "reference": "https://huggingface.co/TencentARC/t2i-adapter-canny-sdxl-1.0",
+        "filename": "t2i-adapter-canny-sdxl-1.0.fp16.safetensors",
+        "url": "https://huggingface.co/TencentARC/t2i-adapter-canny-sdxl-1.0/resolve/main/diffusion_pytorch_model.fp16.safetensors"
+    },
+    {
+        "name": "T2I-Adapter XL (depth-zoe) FP16",
+        "type": "T2I-Adapter",
+        "base": "SDXL 1.0",
+        "save_path": "default",
+        "description": "ControlNet T2I-Adapter XL for depth-zoe",
+        "reference": "https://huggingface.co/TencentARC/t2i-adapter-depth-zoe-sdxl-1.0",
+        "filename": "t2i-adapter-depth-zoe-sdxl-1.0.fp16.safetensors",
+        "url": "https://huggingface.co/TencentARC/t2i-adapter-depth-zoe-sdxl-1.0/resolve/main/diffusion_pytorch_model.fp16.safetensors"
+    },
+    {
+        "name": "T2I-Adapter XL (depth-midas) FP16",
+        "type": "T2I-Adapter",
+        "base": "SDXL 1.0",
+        "save_path": "default",
+        "description": "ControlNet T2I-Adapter XL for depth-midas",
+        "reference": "https://huggingface.co/TencentARC/t2i-adapter-depth-midas-sdxl-1.0",
+        "filename": "t2i-adapter-depth-midas-sdxl-1.0.fp16.safetensors",
+        "url": "https://huggingface.co/TencentARC/t2i-adapter-depth-midas-sdxl-1.0/resolve/main/diffusion_pytorch_model.fp16.safetensors"
+    },
+    {
+        "name": "T2I-Adapter XL (sketch) FP16",
+        "type": "T2I-Adapter",
+        "base": "SDXL 1.0",
+        "save_path": "default",
+        "description": "ControlNet T2I-Adapter XL for sketch",
+        "reference": "https://huggingface.co/TencentARC/t2i-adapter-sketch-sdxl-1.0",
+        "filename": "t2i-adapter-sketch-sdxl-1.0.fp16.safetensors",
+        "url": "https://huggingface.co/TencentARC/t2i-adapter-sketch-sdxl-1.0/resolve/main/diffusion_pytorch_model.fp16.safetensors"
+    },
+    {
+        "name": "T2I-Adapter XL (lineart)",
+        "type": "T2I-Adapter",
+        "base": "SDXL 1.0",
+        "save_path": "default",
+        "description": "ControlNet T2I-Adapter XL for lineart",
+        "reference": "https://huggingface.co/TencentARC/t2i-adapter-lineart-sdxl-1.0",
+        "filename": "t2i-adapter-lineart-sdxl-1.0.safetensors",
+        "url": "https://huggingface.co/TencentARC/t2i-adapter-lineart-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors"
+    },
+    {
+        "name": "T2I-Adapter XL (canny)",
+        "type": "T2I-Adapter",
+        "base": "SDXL 1.0",
+        "save_path": "default",
+        "description": "ControlNet T2I-Adapter XL for canny",
+        "reference": "https://huggingface.co/TencentARC/t2i-adapter-canny-sdxl-1.0",
+        "filename": "t2i-adapter-canny-sdxl-1.0.safetensors",
+        "url": "https://huggingface.co/TencentARC/t2i-adapter-canny-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors"
+    },
+    {
+        "name": "T2I-Adapter XL (depth-zoe)",
+        "type": "T2I-Adapter",
+        "base": "SDXL 1.0",
+        "save_path": "default",
+        "description": "ControlNet T2I-Adapter XL for depth-zoe",
+        "reference": "https://huggingface.co/TencentARC/t2i-adapter-depth-zoe-sdxl-1.0",
+        "filename": "t2i-adapter-depth-zoe-sdxl-1.0.safetensors",
+        "url": "https://huggingface.co/TencentARC/t2i-adapter-depth-zoe-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors"
+    },
+    {
+        "name": "T2I-Adapter XL (depth-midas)",
+        "type": "T2I-Adapter",
+        "base": "SDXL 1.0",
+        "save_path": "default",
+        "description": "ControlNet T2I-Adapter XL for depth-midas",
+        "reference": "https://huggingface.co/TencentARC/t2i-adapter-depth-midas-sdxl-1.0",
+        "filename": "t2i-adapter-depth-midas-sdxl-1.0.safetensors",
+        "url": "https://huggingface.co/TencentARC/t2i-adapter-depth-midas-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors"
+    },
+    {
+        "name": "T2I-Adapter XL (sketch)",
+        "type": "T2I-Adapter",
+        "base": "SDXL 1.0",
+        "save_path": "default",
+        "description": "ControlNet T2I-Adapter XL for sketch",
+        "reference": "https://huggingface.co/TencentARC/t2i-adapter-sketch-sdxl-1.0",
+        "filename": "t2i-adapter-sketch-sdxl-1.0.safetensors",
+        "url": "https://huggingface.co/TencentARC/t2i-adapter-sketch-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors"
+    },
+    {
+        "name": "T2I-Adapter XL (openpose)",
+        "type": "T2I-Adapter",
+        "base": "SDXL 1.0",
+        "save_path": "default",
+        "description": "ControlNet T2I-Adapter XL for openpose",
+        "reference": "https://huggingface.co/TencentARC/t2i-adapter-openpose-sdxl-1.0",
+        "filename": "t2i-adapter-openpose-sdxl-1.0.safetensors",
+        "url": "https://huggingface.co/TencentARC/t2i-adapter-openpose-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors"
+    },
+    {
       "name": "CiaraRowles/TemporalNet2",
       "type": "controlnet",
       "base": "SD1.5",
       "save_path": "default",
       "description": "TemporalNet was a ControlNet model designed to enhance the temporal consistency of generated outputs",
       "reference": "https://huggingface.co/CiaraRowles/TemporalNet2",
-      "filename": "temporalnetversion2.ckpt",
-      "url": "https://huggingface.co/CiaraRowles/TemporalNet2/resolve/main/temporalnetversion2.ckpt"
+      "filename": "temporalnetversion2.safetensors",
+      "url": "https://huggingface.co/CiaraRowles/TemporalNet2/resolve/main/temporalnetversion2.safetensors"
     },
     {
       "name": "CiaraRowles/TemporalNet1XL (1.0)",
@@ -633,8 +958,8 @@
     {
       "name": "CLIPVision model (stabilityai/clip_vision_g)",
       "type": "clip_vision",
-      "base": "SDXL",
-      "save_path": "clip_vision/SDXL",
+      "base": "vit-g",
+      "save_path": "clip_vision",
       "description": "[3.69GB] clip_g vision model",
       "reference": "https://huggingface.co/stabilityai/control-lora",
       "filename": "clip_vision_g.safetensors",
@@ -643,32 +968,32 @@
     {
       "name": "CLIPVision model (openai/clip-vit-large)",
       "type": "clip_vision",
-      "base": "SD1.5",
-      "save_path": "clip_vision/SD1.5",
+      "base": "ViT-L",
+      "save_path": "clip_vision",
       "description": "[1.7GB] CLIPVision model (needed for styles model)",
       "reference": "https://huggingface.co/openai/clip-vit-large-patch14",
-      "filename": "pytorch_model.bin",
-      "url": "https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/pytorch_model.bin"
+      "filename": "clip-vit-large-patch14.bin",
+      "url": "https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/model.safetensors"
     },
     {
-      "name": "CLIPVision model (IP-Adapter)",
+      "name": "CLIPVision model (IP-Adapter) CLIP-ViT-H-14-laion2B-s32B-b79K",
       "type": "clip_vision",
-      "base": "SD1.5",
-      "save_path": "clip_vision/SD1.5",
+      "base": "ViT-H",
+      "save_path": "clip_vision",
       "description": "[2.5GB] CLIPVision model (needed for IP-Adapter)",
       "reference": "https://huggingface.co/h94/IP-Adapter",
-      "filename": "pytorch_model.bin",
-      "url": "https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/pytorch_model.bin"
+      "filename": "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors",
+      "url": "https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors"
     },
     {
-      "name": "CLIPVision model (IP-Adapter)",
+      "name": "CLIPVision model (IP-Adapter) CLIP-ViT-bigG-14-laion2B-39B-b160k",
       "type": "clip_vision",
-      "base": "SDXL",
-      "save_path": "clip_vision/SDXL",
+      "base": "ViT-G",
+      "save_path": "clip_vision",
       "description": "[3.69GB] CLIPVision model (needed for IP-Adapter)",
       "reference": "https://huggingface.co/h94/IP-Adapter",
-      "filename": "pytorch_model.bin",
-      "url": "https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/image_encoder/pytorch_model.bin"
+      "filename": "CLIP-ViT-bigG-14-laion2B-39B-b160k.safetensors",
+      "url": "https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/image_encoder/model.safetensors"
     },
     {
       "name": "stabilityai/control-lora-canny-rank128.safetensors",
@@ -938,10 +1263,30 @@
       "type": "controlnet",
       "base": "SD1.5",
       "save_path": "default",
-      "description": "Safetensors/FP16 versions of the new ControlNet-v1-1 checkpoints (tile) / v11f1e<BR>You need to this model for <B>Tiled Resample</B>",
+      "description": "Safetensors/FP16 versions of the new ControlNet-v1-1 checkpoints (tile) / v11f1e\nYou need to this model for <B>Tiled Resample</B>",
       "reference": "https://huggingface.co/comfyanonymous/ControlNet-v1-1_fp16_safetensors",
       "filename": "control_v11f1e_sd15_tile_fp16.safetensors",
       "url": "https://huggingface.co/comfyanonymous/ControlNet-v1-1_fp16_safetensors/resolve/main/control_v11f1e_sd15_tile_fp16.safetensors"
+    },
+    {
+      "name": "ControlNet-HandRefiner-pruned (inpaint-depth-hand; fp16)",
+      "type": "controlnet",
+      "base": "SD1.5",
+      "save_path": "default",
+      "description": "This inpaint-depth controlnet model is specialized for the hand refiner.",
+      "reference": "https://huggingface.co/hr16/ControlNet-HandRefiner-pruned",
+      "filename": "control_sd15_inpaint_depth_hand_fp16.safetensors",
+      "url": "https://huggingface.co/hr16/ControlNet-HandRefiner-pruned/resolve/main/control_sd15_inpaint_depth_hand_fp16.safetensors"
+    },
+    {
+      "name": "control_boxdepth_LooseControlfp16 (fp16)",
+      "type": "controlnet",
+      "base": "SD1.5",
+      "save_path": "default",
+      "description": "Loose ControlNet model",
+      "reference": "https://huggingface.co/ioclab/LooseControl_WebUICombine",
+      "filename": "control_boxdepth_LooseControlfp16.safetensors",
+      "url": "https://huggingface.co/ioclab/LooseControl_WebUICombine/resolve/main/control_boxdepth_LooseControlfp16.safetensors"
     },
     {
       "name": "GLIGEN textbox (fp16; pruned)",
@@ -1176,197 +1521,262 @@
     },
 
     {
-      "name": "animatediff/mmd_sd_v14.ckpt (comfyui-animatediff)",
+      "name": "animatediff/mmd_sd_v14.ckpt (comfyui-animatediff) (Updated path)",
       "type": "animatediff",
       "base": "SD1.x",
-      "save_path": "custom_nodes/comfyui-animatediff/models",
-      "description": "Pressing 'install' directly downloads the model from the ArtVentureX/AnimateDiff extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "AnimateDiff",
+      "description": "Pressing 'install' directly downloads the model from the ArtVentureX/AnimateDiff extension node.",
       "reference": "https://huggingface.co/guoyww/animatediff",
       "filename": "mm_sd_v14.ckpt",
       "url": "https://huggingface.co/guoyww/animatediff/resolve/main/mm_sd_v14.ckpt"
     },
     {
-      "name": "animatediff/mm_sd_v15.ckpt (comfyui-animatediff)",
+      "name": "animatediff/mm_sd_v15.ckpt (comfyui-animatediff) (Updated path)",
       "type": "animatediff",
       "base": "SD1.x",
-      "save_path": "custom_nodes/comfyui-animatediff/models",
-      "description": "Pressing 'install' directly downloads the model from the ArtVentureX/AnimateDiff extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "AnimateDiff",
+      "description": "Pressing 'install' directly downloads the model from the ArtVentureX/AnimateDiff extension node.",
       "reference": "https://huggingface.co/guoyww/animatediff",
       "filename": "mm_sd_v15.ckpt",
       "url": "https://huggingface.co/guoyww/animatediff/resolve/main/mm_sd_v15.ckpt"
     },
 
     {
-      "name": "animatediff/mmd_sd_v14.ckpt (ComfyUI-AnimateDiff-Evolved)",
+      "name": "animatediff/mmd_sd_v14.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "animatediff",
       "base": "SD1.x",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/models",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_models",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/guoyww/animatediff",
       "filename": "mm_sd_v14.ckpt",
       "url": "https://huggingface.co/guoyww/animatediff/resolve/main/mm_sd_v14.ckpt"
     },
     {
-      "name": "animatediff/mm_sd_v15.ckpt (ComfyUI-AnimateDiff-Evolved)",
+      "name": "animatediff/mm_sd_v15.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "animatediff",
       "base": "SD1.x",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/models",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_models",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/guoyww/animatediff",
       "filename": "mm_sd_v15.ckpt",
       "url": "https://huggingface.co/guoyww/animatediff/resolve/main/mm_sd_v15.ckpt"
     },
     {
-      "name": "animatediff/mm_sd_v15_v2.ckpt (ComfyUI-AnimateDiff-Evolved)",
+      "name": "animatediff/mm_sd_v15_v2.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "animatediff",
       "base": "SD1.x",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/models",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_models",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/guoyww/animatediff",
       "filename": "mm_sd_v15_v2.ckpt",
       "url": "https://huggingface.co/guoyww/animatediff/resolve/main/mm_sd_v15_v2.ckpt"
     },
     {
-      "name": "animatediff/mm_sdxl_v10_beta.ckpt (ComfyUI-AnimateDiff-Evolved)",
+      "name": "animatediff/v3_sd15_mm.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
+      "type": "animatediff",
+      "base": "SD1.x",
+      "save_path": "animatediff_models",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
+      "reference": "https://huggingface.co/guoyww/animatediff",
+      "filename": "v3_sd15_mm.ckpt",
+      "url": "https://huggingface.co/guoyww/animatediff/resolve/main/v3_sd15_mm.ckpt"
+    },
+
+    {
+      "name": "animatediff/mm_sdxl_v10_beta.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "animatediff",
       "base": "SDXL",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/models",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_models",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/guoyww/animatediff",
       "filename": "mm_sdxl_v10_beta.ckpt",
       "url": "https://huggingface.co/guoyww/animatediff/resolve/main/mm_sdxl_v10_beta.ckpt"
     },
     {
-      "name": "AD_Stabilized_Motion/mm-Stabilized_high.pth (ComfyUI-AnimateDiff-Evolved)",
+      "name": "AD_Stabilized_Motion/mm-Stabilized_high.pth (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "animatediff",
       "base": "SD1.x",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/models",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_models",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/manshoety/AD_Stabilized_Motion",
       "filename": "mm-Stabilized_high.pth",
       "url": "https://huggingface.co/manshoety/AD_Stabilized_Motion/resolve/main/mm-Stabilized_high.pth"
     },
     {
-      "name": "AD_Stabilized_Motion/mm-Stabilized_mid.pth (ComfyUI-AnimateDiff-Evolved)",
+      "name": "AD_Stabilized_Motion/mm-Stabilized_mid.pth (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "animatediff",
       "base": "SD1.x",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/models",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_models",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/manshoety/AD_Stabilized_Motion",
       "filename": "mm-Stabilized_mid.pth",
       "url": "https://huggingface.co/manshoety/AD_Stabilized_Motion/resolve/main/mm-Stabilized_mid.pth"
     },
     {
-      "name": "CiaraRowles/temporaldiff-v1-animatediff.ckpt (ComfyUI-AnimateDiff-Evolved)",
+      "name": "CiaraRowles/temporaldiff-v1-animatediff.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "animatediff",
       "base": "SD1.x",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/models",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_models",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/CiaraRowles/TemporalDiff",
       "filename": "temporaldiff-v1-animatediff.ckpt",
       "url": "https://huggingface.co/CiaraRowles/TemporalDiff/resolve/main/temporaldiff-v1-animatediff.ckpt"
     },
 
     {
-      "name": "animatediff/v2_lora_PanLeft.ckpt (ComfyUI-AnimateDiff-Evolved)",
+      "name": "animatediff/v2_lora_PanLeft.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "motion lora",
       "base": "SD1.x",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/motion_lora",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_motion_lora",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/guoyww/animatediff",
       "filename": "v2_lora_PanLeft.ckpt",
       "url": "https://huggingface.co/guoyww/animatediff/resolve/main/v2_lora_PanLeft.ckpt"
     },
     {
-      "name": "animatediff/v2_lora_PanRight.ckpt (ComfyUI-AnimateDiff-Evolved)",
+      "name": "animatediff/v2_lora_PanRight.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "motion lora",
       "base": "SD1.x",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/motion_lora",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_motion_lora",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/guoyww/animatediff",
       "filename": "v2_lora_PanRight.ckpt",
       "url": "https://huggingface.co/guoyww/animatediff/resolve/main/v2_lora_PanRight.ckpt"
     },
     {
-      "name": "animatediff/v2_lora_RollingAnticlockwise.ckpt (ComfyUI-AnimateDiff-Evolved)",
+      "name": "animatediff/v2_lora_RollingAnticlockwise.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "motion lora",
       "base": "SD1.x",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/motion_lora",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_motion_lora",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/guoyww/animatediff",
       "filename": "v2_lora_RollingAnticlockwise.ckpt",
       "url": "https://huggingface.co/guoyww/animatediff/resolve/main/v2_lora_RollingAnticlockwise.ckpt"
     },
     {
-      "name": "animatediff/v2_lora_RollingClockwise.ckpt (ComfyUI-AnimateDiff-Evolved)",
+      "name": "animatediff/v2_lora_RollingClockwise.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "motion lora",
       "base": "SD1.x",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/motion_lora",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_motion_lora",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/guoyww/animatediff",
       "filename": "v2_lora_RollingClockwise.ckpt",
       "url": "https://huggingface.co/guoyww/animatediff/resolve/main/v2_lora_RollingClockwise.ckpt"
     },
     {
-      "name": "animatediff/v2_lora_TiltDown.ckpt (ComfyUI-AnimateDiff-Evolved)",
+      "name": "animatediff/v2_lora_TiltDown.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "motion lora",
       "base": "SD1.x",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/motion_lora",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_motion_lora",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/guoyww/animatediff",
       "filename": "v2_lora_TiltDown.ckpt",
       "url": "https://huggingface.co/guoyww/animatediff/resolve/main/v2_lora_TiltDown.ckpt"
     },
     {
-      "name": "animatediff/v2_lora_TiltUp.ckpt (ComfyUI-AnimateDiff-Evolved)",
+      "name": "animatediff/v2_lora_TiltUp.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "motion lora",
       "base": "SD1.x",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/motion_lora",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_motion_lora",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/guoyww/animatediff",
       "filename": "v2_lora_TiltUp.ckpt",
       "url": "https://huggingface.co/guoyww/animatediff/resolve/main/v2_lora_TiltUp.ckpt"
     },
     {
-      "name": "animatediff/v2_lora_ZoomIn.ckpt (ComfyUI-AnimateDiff-Evolved)",
+      "name": "animatediff/v2_lora_ZoomIn.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "motion lora",
       "base": "SD1.x",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/motion_lora",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_motion_lora",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/guoyww/animatediff",
       "filename": "v2_lora_ZoomIn.ckpt",
       "url": "https://huggingface.co/guoyww/animatediff/resolve/main/v2_lora_ZoomIn.ckpt"
     },
     {
-      "name": "animatediff/v2_lora_ZoomOut.ckpt (ComfyUI-AnimateDiff-Evolved)",
+      "name": "animatediff/v2_lora_ZoomOut.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "motion lora",
       "base": "SD1.x",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/motion_lora",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_motion_lora",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/guoyww/animatediff",
       "filename": "v2_lora_ZoomOut.ckpt",
       "url": "https://huggingface.co/guoyww/animatediff/resolve/main/v2_lora_ZoomOut.ckpt"
     },
     {
-      "name": "LongAnimatediff/lt_long_mm_32_frames.ckpt (ComfyUI-AnimateDiff-Evolved)",
+      "name": "LongAnimatediff/lt_long_mm_32_frames.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "animatediff",
       "base": "SD1.x",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/models",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_models",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/Lightricks/LongAnimateDiff",
       "filename": "lt_long_mm_32_frames.ckpt",
       "url": "https://huggingface.co/Lightricks/LongAnimateDiff/resolve/main/lt_long_mm_32_frames.ckpt"
     },
     {
-      "name": "LongAnimatediff/lt_long_mm_16_64_frames.ckpt (ComfyUI-AnimateDiff-Evolved)",
+      "name": "LongAnimatediff/lt_long_mm_16_64_frames.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
       "type": "animatediff",
       "base": "SD1.x",
-      "save_path": "custom_nodes/ComfyUI-AnimateDiff-Evolved/models",
-      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node. (Note: Requires ComfyUI-Manager V0.24 or above)",
+      "save_path": "animatediff_models",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
       "reference": "https://huggingface.co/Lightricks/LongAnimateDiff",
       "filename": "lt_long_mm_16_64_frames.ckpt",
       "url": "https://huggingface.co/Lightricks/LongAnimateDiff/resolve/main/lt_long_mm_16_64_frames.ckpt"
     },
+    {
+      "name": "LongAnimatediff/lt_long_mm_16_64_frames_v1.1.ckpt (ComfyUI-AnimateDiff-Evolved) (Updated path)",
+      "type": "animatediff",
+      "base": "SD1.x",
+      "save_path": "animatediff_models",
+      "description": "Pressing 'install' directly downloads the model from the Kosinkadink/ComfyUI-AnimateDiff-Evolved extension node.",
+      "reference": "https://huggingface.co/Lightricks/LongAnimateDiff",
+      "filename": "lt_long_mm_16_64_frames_v1.1.ckpt",
+      "url": "https://huggingface.co/Lightricks/LongAnimateDiff/resolve/main/lt_long_mm_16_64_frames_v1.1.ckpt"
+    },
+
+    
+    {
+      "name": "animatediff/v3_sd15_sparsectrl_rgb.ckpt (ComfyUI-AnimateDiff-Evolved)",
+      "type": "controlnet",
+      "base": "SD1.x",
+      "save_path": "controlnet/SD1.5/animatediff",
+      "description": "AnimateDiff SparseCtrl RGB ControlNet model",
+      "reference": "https://huggingface.co/guoyww/animatediff",
+      "filename": "v3_sd15_sparsectrl_rgb.ckpt",
+      "url": "https://huggingface.co/guoyww/animatediff/resolve/main/v3_sd15_sparsectrl_rgb.ckpt"
+    },
+    {
+      "name": "animatediff/v3_sd15_sparsectrl_scribble.ckpt",
+      "type": "controlnet",
+      "base": "SD1.x",
+      "save_path": "controlnet/SD1.5/animatediff",
+      "description": "AnimateDiff SparseCtrl Scribble ControlNet model",
+      "reference": "https://huggingface.co/guoyww/animatediff",
+      "filename": "v3_sd15_sparsectrl_scribble.ckpt",
+      "url": "https://huggingface.co/guoyww/animatediff/resolve/main/v3_sd15_sparsectrl_scribble.ckpt"
+    },
+    {
+      "name": "animatediff/v3_sd15_adapter.ckpt",
+      "type": "lora",
+      "base": "SD1.x",
+      "save_path": "loras/SD1.5/animatediff",
+      "description": "AnimateDiff Adapter LoRA (SD1.5)",
+      "reference": "https://huggingface.co/guoyww/animatediff",
+      "filename": "v3_sd15_adapter.ckpt",
+      "url": "https://huggingface.co/guoyww/animatediff/resolve/main/v3_sd15_adapter.ckpt"
+    },
+
+    {
+      "name": "TencentARC/motionctrl.pth",
+      "type": "checkpoints",
+      "base": "MotionCtrl",
+      "save_path": "checkpoints/motionctrl",
+      "description": "To use the ComfyUI-MotionCtrl extension, downloading this model is required.",
+      "reference": "https://huggingface.co/TencentARC/MotionCtrl",
+      "filename": "motionctrl.pth",
+      "url": "https://huggingface.co/TencentARC/MotionCtrl/resolve/main/motionctrl.pth"
+    },
+
     {
       "name": "ip-adapter_sd15.safetensors",
       "type": "IP-Adapter",
@@ -1428,6 +1838,116 @@
       "url": "https://huggingface.co/h94/IP-Adapter/resolve/main/models/ip-adapter-full-face_sd15.safetensors"
     },
     {
+      "name": "ip-adapter-faceid_sd15.bin",
+      "type": "IP-Adapter",
+      "base": "SD1.5",
+      "save_path": "ipadapter",
+      "description": "IP-Adapter-FaceID Model (SD1.5) [ipadapter]",
+      "reference": "https://huggingface.co/h94/IP-Adapter-FaceID",
+      "filename": "ip-adapter-faceid_sd15.bin",
+      "url": "https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid_sd15.bin"
+    },
+    {
+      "name": "ip-adapter-faceid-plus_sd15.bin",
+      "type": "IP-Adapter",
+      "base": "SD1.5",
+      "save_path": "ipadapter",
+      "description": "IP-Adapter-FaceID Plus Model (SD1.5) [ipadapter]",
+      "reference": "https://huggingface.co/h94/IP-Adapter-FaceID",
+      "filename": "ip-adapter-faceid-plus_sd15.bin",
+      "url": "https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid-plus_sd15.bin"
+    },
+    {
+      "name": "ip-adapter-faceid-portrait_sd15.bin",
+      "type": "IP-Adapter",
+      "base": "SD1.5",
+      "save_path": "ipadapter",
+      "description": "IP-Adapter-FaceID Portrait Model (SD1.5) [ipadapter]",
+      "reference": "https://huggingface.co/h94/IP-Adapter-FaceID",
+      "filename": "ip-adapter-faceid-portrait_sd15.bin",
+      "url": "https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid-portrait_sd15.bin"
+    },
+    {
+      "name": "ip-adapter-faceid_sdxl.bin",
+      "type": "IP-Adapter",
+      "base": "SD1.5",
+      "save_path": "ipadapter",
+      "description": "IP-Adapter-FaceID Model (SDXL) [ipadapter]",
+      "reference": "https://huggingface.co/h94/IP-Adapter-FaceID",
+      "filename": "ip-adapter-faceid_sdxl.bin",
+      "url": "https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid_sdxl.bin"
+    },
+    {
+      "name": "ip-adapter-faceid-plusv2_sdxl.bin",
+      "type": "IP-Adapter",
+      "base": "SD1.5",
+      "save_path": "ipadapter",
+      "description": "IP-Adapter-FaceID Plus Model (SDXL) [ipadapter]",
+      "reference": "https://huggingface.co/h94/IP-Adapter-FaceID",
+      "filename": "ip-adapter-faceid-plusv2_sdxl.bin",
+      "url": "https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid-plusv2_sdxl.bin"
+    },
+    {
+      "name": "ip-adapter-faceid_sd15_lora.safetensors",
+      "type": "lora",
+      "base": "SD1.5",
+      "save_path": "loras/ipadapter",
+      "description": "IP-Adapter-FaceID LoRA Model (SD1.5) [ipadapter]",
+      "reference": "https://huggingface.co/h94/IP-Adapter-FaceID",
+      "filename": "ip-adapter-faceid_sd15_lora.safetensors",
+      "url": "https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid_sd15_lora.safetensors"
+    },
+    {
+      "name": "ip-adapter-faceid-plus_sd15_lora.safetensors",
+      "type": "lora",
+      "base": "SD1.5",
+      "save_path": "loras/ipadapter",
+      "description": "IP-Adapter-FaceID Plus LoRA Model (SD1.5) [ipadapter]",
+      "reference": "https://huggingface.co/h94/IP-Adapter-FaceID",
+      "filename": "ip-adapter-faceid-plus_sd15_lora.safetensors",
+      "url": "https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid-plus_sd15_lora.safetensors"
+    },
+    {
+      "name": "ip-adapter-faceid-plusv2_sd15.bin",
+      "type": "IP-Adapter",
+      "base": "SD1.5",
+      "save_path": "ipadapter",
+      "description": "IP-Adapter-FaceID-Plus V2 Model (SD1.5) [ipadapter]",
+      "reference": "https://huggingface.co/h94/IP-Adapter-FaceID",
+      "filename": "ip-adapter-faceid-plusv2_sd15.bin",
+      "url": "https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid-plusv2_sd15.bin"
+    },
+    {
+      "name": "ip-adapter-faceid-plusv2_sd15_lora.safetensors",
+      "type": "lora",
+      "base": "SD1.5",
+      "save_path": "loras/ipadapter",
+      "description": "IP-Adapter-FaceID-Plus V2 LoRA Model (SD1.5) [ipadapter]",
+      "reference": "https://huggingface.co/h94/IP-Adapter-FaceID",
+      "filename": "ip-adapter-faceid-plusv2_sd15_lora.safetensors",
+      "url": "https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid-plusv2_sd15_lora.safetensors"
+    },
+    {
+      "name": "ip-adapter-faceid_sdxl_lora.safetensors",
+      "type": "lora",
+      "base": "SDXL",
+      "save_path": "loras/ipadapter",
+      "description": "IP-Adapter-FaceID LoRA Model (SDXL) [ipadapter]",
+      "reference": "https://huggingface.co/h94/IP-Adapter-FaceID",
+      "filename": "ip-adapter-faceid_sdxl_lora.safetensors",
+      "url": "https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid_sdxl_lora.safetensors"
+    },
+    {
+      "name": "ip-adapter-faceid-plusv2_sdxl_lora.safetensors",
+      "type": "lora",
+      "base": "SDXL",
+      "save_path": "loras/ipadapter",
+      "description": "IP-Adapter-FaceID-Plus V2 LoRA Model (SDXL) [ipadapter]",
+      "reference": "https://huggingface.co/h94/IP-Adapter-FaceID",
+      "filename": "ip-adapter-faceid-plusv2_sdxl_lora.safetensors",
+      "url": "https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid-plusv2_sdxl_lora.safetensors"
+    },
+    {
       "name": "ip-adapter_sdxl.safetensors",
       "type": "IP-Adapter",
       "base": "SDXL",
@@ -1442,7 +1962,7 @@
       "type": "IP-Adapter",
       "base": "SDXL",
       "save_path": "ipadapter",
-      "description": "This model requires the use of the SD1.5 encoder despite being for SDXL checkpoints",
+      "description": "This model requires the use of the SD1.5 encoder despite being for SDXL checkpoints [ipadapter]",
       "reference": "https://huggingface.co/h94/IP-Adapter",
       "filename": "ip-adapter_sdxl_vit-h.safetensors",
       "url": "https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/ip-adapter_sdxl_vit-h.safetensors"
@@ -1452,7 +1972,7 @@
       "type": "IP-Adapter",
       "base": "SDXL",
       "save_path": "ipadapter",
-      "description": "This model requires the use of the SD1.5 encoder despite being for SDXL checkpoints",
+      "description": "This model requires the use of the SD1.5 encoder despite being for SDXL checkpoints [ipadapter]",
       "reference": "https://huggingface.co/h94/IP-Adapter",
       "filename": "ip-adapter-plus_sdxl_vit-h.safetensors",
       "url": "https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/ip-adapter-plus_sdxl_vit-h.safetensors"
@@ -1462,11 +1982,12 @@
       "type": "IP-Adapter",
       "base": "SDXL",
       "save_path": "ipadapter",
-      "description": "This model requires the use of the SD1.5 encoder despite being for SDXL checkpoints",
+      "description": "This model requires the use of the SD1.5 encoder despite being for SDXL checkpoints [ipadapter]",
       "reference": "https://huggingface.co/h94/IP-Adapter",
       "filename": "ip-adapter-plus-face_sdxl_vit-h.safetensors",
       "url": "https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors"
     },
+
     {
       "name": "pfg-novel-n10.pt",
       "type": "PFG",
@@ -1556,6 +2077,242 @@
       "reference": "https://github.com/xinntao/facexlib",
       "filename": "yolov5n-face.pth",
       "url": "https://github.com/sczhou/CodeFormer/releases/download/v0.1.0/yolov5n-face.pth"
+    },
+    {
+      "name": "photomaker-v1.bin",
+      "type": "photomaker",
+      "base": "SDXL",
+      "save_path": "photomaker",
+      "description": "PhotoMaker model. This model is compatible with SDXL.",
+      "reference": "https://huggingface.co/TencentARC/PhotoMaker",
+      "filename": "photomaker-v1.bin",
+      "url": "https://huggingface.co/TencentARC/PhotoMaker/resolve/main/photomaker-v1.bin"
+    },
+    {
+      "name": "1k3d68.onnx",
+      "type": "insightface",
+      "base": "inswapper",
+      "save_path": "insightface/models/antelopev2",
+      "description": "Antelopev2 1k3d68.onnx model for InstantId. (InstantId needs all Antelopev2 models)",
+      "reference": "https://github.com/cubiq/ComfyUI_InstantID#installation",
+      "filename": "1k3d68.onnx",
+      "url": "https://huggingface.co/MonsterMMORPG/tools/resolve/main/1k3d68.onnx"
+    },
+    {
+      "name": "2d106det.onnx",
+      "type": "insightface",
+      "base": "inswapper",
+      "save_path": "insightface/models/antelopev2",
+      "description": "Antelopev2 2d106det.onnx model for InstantId. (InstantId needs all Antelopev2 models)",
+      "reference": "https://github.com/cubiq/ComfyUI_InstantID#installation",
+      "filename": "2d106det.onnx",
+      "url": "https://huggingface.co/MonsterMMORPG/tools/resolve/main/2d106det.onnx"
+    },
+    {
+      "name": "genderage.onnx",
+      "type": "insightface",
+      "base": "inswapper",
+      "save_path": "insightface/models/antelopev2",
+      "description": "Antelopev2 genderage.onnx model for InstantId. (InstantId needs all Antelopev2 models)",
+      "reference": "https://github.com/cubiq/ComfyUI_InstantID#installation",
+      "filename": "genderage.onnx",
+      "url": "https://huggingface.co/MonsterMMORPG/tools/resolve/main/genderage.onnx"
+    },
+    {
+      "name": "glintr100.onnx",
+      "type": "insightface",
+      "base": "inswapper",
+      "save_path": "insightface/models/antelopev2",
+      "description": "Antelopev2 glintr100.onnx model for InstantId. (InstantId needs all Antelopev2 models)",
+      "reference": "https://github.com/cubiq/ComfyUI_InstantID#installation",
+      "filename": "glintr100.onnx",
+      "url": "https://huggingface.co/MonsterMMORPG/tools/resolve/main/glintr100.onnx"
+    },
+    {
+      "name": "scrfd_10g_bnkps.onnx",
+      "type": "insightface",
+      "base": "inswapper",
+      "save_path": "insightface/models/antelopev2",
+      "description": "Antelopev2 scrfd_10g_bnkps.onnx model for InstantId. (InstantId needs all Antelopev2 models)",
+      "reference": "https://github.com/cubiq/ComfyUI_InstantID#installation",
+      "filename": "scrfd_10g_bnkps.onnx",
+      "url": "https://huggingface.co/MonsterMMORPG/tools/resolve/main/scrfd_10g_bnkps.onnx"
+    },
+    {
+      "name": "ip-adapter.bin",
+      "type": "instantid",
+      "base": "SDXL",
+      "save_path": "instantid",
+      "description": "InstantId main model based on IpAdapter",
+      "reference": "https://huggingface.co/InstantX/InstantID",
+      "filename": "ip-adapter.bin",
+      "url": "https://huggingface.co/InstantX/InstantID/resolve/main/ip-adapter.bin"
+    },
+    {
+      "name": "diffusion_pytorch_model.safetensors",
+      "type": "controlnet",
+      "base": "SDXL",
+      "save_path": "controlnet/instantid",
+      "description": "InstantId controlnet model",
+      "reference": "https://huggingface.co/InstantX/InstantID",
+      "filename": "diffusion_pytorch_model.safetensors",
+      "url": "https://huggingface.co/InstantX/InstantID/resolve/main/ControlNetModel/diffusion_pytorch_model.safetensors"
+    },
+
+    {
+      "name": "efficient_sam_s_cpu.jit [ComfyUI-YoloWorld-EfficientSAM]",
+      "type": "efficient_sam",
+      "base": "efficient_sam",
+      "save_path": "custom_nodes/ComfyUI-YoloWorld-EfficientSAM",
+      "description": "Install efficient_sam_s_cpu.jit into ComfyUI-YoloWorld-EfficientSAM",
+      "reference": "https://huggingface.co/camenduru/YoloWorld-EfficientSAM/tree/main",
+      "filename": "efficient_sam_s_cpu.jit",
+      "url": "https://huggingface.co/camenduru/YoloWorld-EfficientSAM/resolve/main/efficient_sam_s_cpu.jit"
+    },
+    {
+      "name": "efficient_sam_s_gpu.jit [ComfyUI-YoloWorld-EfficientSAM]",
+      "type": "efficient_sam",
+      "base": "efficient_sam",
+      "save_path": "custom_nodes/ComfyUI-YoloWorld-EfficientSAM",
+      "description": "Install efficient_sam_s_gpu.jit into ComfyUI-YoloWorld-EfficientSAM",
+      "reference": "https://huggingface.co/camenduru/YoloWorld-EfficientSAM/tree/main",
+      "filename": "efficient_sam_s_gpu.jit",
+      "url": "https://huggingface.co/camenduru/YoloWorld-EfficientSAM/resolve/main/efficient_sam_s_gpu.jit"
+    },
+
+    {
+      "name": "shape_predictor_68_face_landmarks.dat [Face Analysis]",
+      "type": "Shape Predictor",
+      "base": "DLIB",
+      "save_path": "custom_nodes/ComfyUI_FaceAnalysis/dlib",
+      "description": "To use the Face Analysis for ComfyUI custom node, installation of this model is needed.",
+      "reference": "https://huggingface.co/matt3ounstable/dlib_predictor_recognition/tree/main",
+      "filename": "shape_predictor_68_face_landmarks.dat",
+      "url": "https://huggingface.co/matt3ounstable/dlib_predictor_recognition/resolve/main/shape_predictor_68_face_landmarks.dat"
+    },
+    {
+      "name": "dlib_face_recognition_resnet_model_v1.dat [Face Analysis]",
+      "type": "Face Recognition",
+      "base": "DLIB",
+      "save_path": "custom_nodes/ComfyUI_FaceAnalysis/dlib",
+      "description": "To use the Face Analysis for ComfyUI custom node, installation of this model is needed.",
+      "reference": "https://huggingface.co/matt3ounstable/dlib_predictor_recognition/tree/main",
+      "filename": "dlib_face_recognition_resnet_model_v1.dat",
+      "url": "https://huggingface.co/matt3ounstable/dlib_predictor_recognition/resolve/main/dlib_face_recognition_resnet_model_v1.dat"
+    },
+    {
+      "name": "InstanceDiffusion/fusers",
+      "type": "InstanceDiffusion",
+      "base": "SD1.5",
+      "save_path": "instance_models/fuser_models",
+      "description": "Fusers checkpoints for multi-object prompting with InstanceDiffusion.",
+      "reference": "https://huggingface.co/logtd/instance_diffusion",
+      "filename": "fusers.ckpt",
+      "url": "https://huggingface.co/logtd/instance_diffusion/resolve/main/fusers.ckpt"
+    },
+    {
+      "name": "InstanceDiffusion/position_net",
+      "type": "InstanceDiffusion",
+      "base": "SD1.5",
+      "save_path": "instance_models/positionnet_models",
+      "description": "PositionNet checkpoints for multi-object prompting with InstanceDiffusion.",
+      "reference": "https://huggingface.co/logtd/instance_diffusion",
+      "filename": "position_net.ckpt",
+      "url": "https://huggingface.co/logtd/instance_diffusion/resolve/main/position_net.ckpt"
+    },
+    {
+      "name": "InstanceDiffusion/scaleu",
+      "type": "InstanceDiffusion",
+      "base": "SD1.5",
+      "save_path": "instance_models/scaleu_models",
+      "description": "ScaleU checkpoints for multi-object prompting with InstanceDiffusion.",
+      "reference": "https://huggingface.co/logtd/instance_diffusion",
+      "filename": "scaleu.ckpt",
+      "url": "https://huggingface.co/logtd/instance_diffusion/resolve/main/scaleu.ckpt"
+    },
+    {
+      "name": "1k3d68.onnx",
+      "type": "insightface",
+      "base": "inswapper",
+      "save_path": "insightface/models/buffalo_l",
+      "description": "Buffalo_l 1k3d68.onnx model for IpAdapterPlus",
+      "reference": "https://github.com/cubiq/ComfyUI_IPAdapter_plus?tab=readme-ov-file#faceid",
+      "filename": "1k3d68.onnx",
+      "url": "https://huggingface.co/public-data/insightface/resolve/main/models/buffalo_l/1k3d68.onnx"
+    },
+    {
+      "name": "2d106det.onnx",
+      "type": "insightface",
+      "base": "inswapper",
+      "save_path": "insightface/models/buffalo_l",
+      "description": "Buffalo_l 2d106det.onnx model for IpAdapterPlus",
+      "reference": "https://github.com/cubiq/ComfyUI_IPAdapter_plus?tab=readme-ov-file#faceid",
+      "filename": "2d106det.onnx",
+      "url": "https://huggingface.co/public-data/insightface/resolve/main/models/buffalo_l/2d106det.onnx"
+    },
+    {
+      "name": "det_10g.onnx",
+      "type": "insightface",
+      "base": "inswapper",
+      "save_path": "insightface/models/buffalo_l",
+      "description": "Buffalo_l det_10g.onnx model for IpAdapterPlus",
+      "reference": "https://github.com/cubiq/ComfyUI_IPAdapter_plus?tab=readme-ov-file#faceid",
+      "filename": "det_10g.onnx",
+      "url": "https://huggingface.co/public-data/insightface/resolve/main/models/buffalo_l/det_10g.onnx"
+    },
+    {
+      "name": "genderage.onnx",
+      "type": "insightface",
+      "base": "inswapper",
+      "save_path": "insightface/models/buffalo_l",
+      "description": "Buffalo_l genderage.onnx model for IpAdapterPlus",
+      "reference": "https://github.com/cubiq/ComfyUI_IPAdapter_plus?tab=readme-ov-file#faceid",
+      "filename": "genderage.onnx",
+      "url": "https://huggingface.co/public-data/insightface/resolve/main/models/buffalo_l/genderage.onnx"
+    },
+    {
+      "name": "w600k_r50.onnx",
+      "type": "insightface",
+      "base": "inswapper",
+      "save_path": "insightface/models/buffalo_l",
+      "description": "Buffalo_l w600k_r50.onnx model for IpAdapterPlus",
+      "reference": "https://github.com/cubiq/ComfyUI_IPAdapter_plus?tab=readme-ov-file#faceid",
+      "filename": "w600k_r50.onnx",
+      "url": "https://huggingface.co/public-data/insightface/resolve/main/models/buffalo_l/w600k_r50.onnx"
+    },
+    {
+        "name": "BLIP ImageCaption (COCO) w/ ViT-B and CapFilt-L",
+        "type": "BLIP_MODEL",
+        "base": "blip_model",
+        "save_path": "blip",
+        "description": "BLIP ImageCaption (COCO) w/ ViT-B and CapFilt-L",
+        "reference": "https://github.com/salesforce/BLIP",
+        "filename": "model_base_capfilt_large.pth",
+        "url": "https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_capfilt_large.pth"
+    },
+    {
+        "name": "GroundingDINO SwinT OGC - Model",
+        "type": "GroundingDINO",
+        "base": "DINO",
+        "save_path": "groundingdino",
+        "description": "GroundingDINO SwinT OGC Model",
+        "reference": "https://huggingface.co/ShilongLiu/GroundingDINO",
+        "filename": "groundingdino_swint_ogc.pth",
+        "url": "https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/groundingdino_swint_ogc.pth"
+    },
+    {
+        "name": "GroundingDINO SwinT OGC - CFG File",
+        "type": "GroundingDINO",
+        "base": "DINO",
+        "save_path": "groundingdino",
+        "description": "GroundingDINO SwinT OGC CFG File",
+        "reference": "https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py",
+        "filename": "GroundingDINO_SwinT_OGC.cfg.py",
+        "url": "https://huggingface.co/ShilongLiu/GroundingDINO/raw/main/GroundingDINO_SwinT_OGC.cfg.py"
     }
-  ]  
+
+
+
+    
+  ]
 }

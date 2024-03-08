@@ -131,7 +131,10 @@ export class CustomNodesInstaller extends ComfyDialog {
 			let content = data.author.toLowerCase() + data.description.toLowerCase() + data.title.toLowerCase() + data.reference.toLowerCase();
 
 			if(this.filter && this.filter != '*') {
-				if(this.filter != data.installed) {
+				if(this.filter == 'True' && (data.installed == 'Update' || data.installed == 'Fail')) {
+					this.grid_rows[i].control.style.display = null;
+				}
+				else if(this.filter != data.installed) {
 					this.grid_rows[i].control.style.display = 'none';
 					continue;
 				}
@@ -151,7 +154,6 @@ export class CustomNodesInstaller extends ComfyDialog {
 	async filter_missing_node(data) {
 		const mappings = await getCustomnodeMappings();
 
-
 		// build regex->url map
 		const regex_to_url = [];
 		for (let i in data) {
@@ -162,11 +164,17 @@ export class CustomNodesInstaller extends ComfyDialog {
 		}
 
 		// build name->url map
-		const name_to_url = {};
+		const name_to_urls = {};
 		for (const url in mappings) {
 			const names = mappings[url];
+
 			for(const name in names[0]) {
-				name_to_url[names[0][name]] = url;
+				let v = name_to_urls[names[0][name]];
+				if(v == undefined) {
+					v = [];
+					name_to_urls[names[0][name]] = v;
+				}
+				v.push(url);
 			}
 		}
 
@@ -191,9 +199,11 @@ export class CustomNodesInstaller extends ComfyDialog {
 				continue;
 
 			if (!registered_nodes.has(node_type)) {
-				const url = name_to_url[node_type.trim()];
-				if(url)
-					missing_nodes.add(url);
+				const urls = name_to_urls[node_type.trim()];
+				if(urls)
+					urls.forEach(url => {
+						missing_nodes.add(url);
+					});
 				else {
 					for(let j in regex_to_url) {
 						if(regex_to_url[j].regex.test(node_type)) {
@@ -207,7 +217,7 @@ export class CustomNodesInstaller extends ComfyDialog {
 		let unresolved_nodes = await getUnresolvedNodesInComponent();
 		for (let i in unresolved_nodes) {
 			let node_type = unresolved_nodes[i];
-			const url = name_to_url[node_type];
+			const url = name_to_urls[node_type];
 			if(url)
 				missing_nodes.add(url);
 		}
@@ -495,6 +505,7 @@ export class CustomNodesInstaller extends ComfyDialog {
 				installBtn.className = "cm-btn-install";
 				var installBtn2 = null;
 				var installBtn3 = null;
+				var installBtn4 = null;
 
 				this.install_buttons.push(installBtn);
 
@@ -510,6 +521,7 @@ export class CustomNodesInstaller extends ComfyDialog {
 					installBtn.innerHTML = 'Uninstall';
 					installBtn.style.backgroundColor = 'red';
 					break;
+
 				case 'Update':
 					installBtn2 = document.createElement('button');
 					installBtn2.innerHTML = 'Update';
@@ -528,8 +540,25 @@ export class CustomNodesInstaller extends ComfyDialog {
 					installBtn.innerHTML = 'Uninstall';
 					installBtn.style.backgroundColor = 'red';
 					break;
+
 				case 'Fail':
+					installBtn4 = document.createElement('button');
+					installBtn4.innerHTML = 'Try fix';
+					installBtn4.className = "cm-btn-disable";
+					installBtn4.style.backgroundColor = '#6495ED';
+					installBtn4.style.color = 'white';
+					this.install_buttons.push(installBtn4);
+
 				case 'True':
+					if(manager_instance.update_check_checkbox.checked) {
+						installBtn2 = document.createElement('button');
+						installBtn2.innerHTML = 'Try update';
+						installBtn2.className = "cm-btn-update";
+						installBtn2.style.backgroundColor = 'Gray';
+						installBtn2.style.color = 'white';
+						this.install_buttons.push(installBtn2);
+					}
+
 					installBtn3 = document.createElement('button');
 					installBtn3.innerHTML = 'Disable';
 					installBtn3.className = "cm-btn-disable";
@@ -546,7 +575,7 @@ export class CustomNodesInstaller extends ComfyDialog {
 					installBtn.style.color = 'white';
 					break;
 				default:
-					installBtn.innerHTML = `Try Install${data.installed}`;
+					installBtn.innerHTML = `Try Install`;
 					installBtn.style.backgroundColor = 'Gray';
 					installBtn.style.color = 'white';
 				}
@@ -568,6 +597,15 @@ export class CustomNodesInstaller extends ComfyDialog {
 					});
 
 					data5.appendChild(installBtn3);
+				}
+
+				if(installBtn4 != null) {
+					installBtn4.style.width = "120px";
+					installBtn4.addEventListener('click', function() {
+						install_checked_custom_node(self.grid_rows, j, CustomNodesInstaller.instance, 'fix');
+					});
+
+					data5.appendChild(installBtn4);
 				}
 
 				installBtn.style.width = "120px";

@@ -9,8 +9,20 @@ import locale
 import platform
 
 
-message_collapses = []
+glob_path = os.path.join(os.path.dirname(__file__), "glob")
+sys.path.append(glob_path)
+
+import cm_global
+
+
+def skip_pip_spam(x):
+    return 'Requirement already satisfied:' in x
+
+
+message_collapses = [skip_pip_spam]
 import_failed_extensions = set()
+cm_global.variables['cm.on_revision_detected_handler'] = []
+enable_file_logging = True
 
 
 def register_message_collapse(f):
@@ -18,13 +30,34 @@ def register_message_collapse(f):
     message_collapses.append(f)
 
 
-def is_import_failed_extension(x):
+def is_import_failed_extension(name):
     global import_failed_extensions
-    return x in import_failed_extensions
+    return name in import_failed_extensions
+
+
+def check_file_logging():
+    global enable_file_logging
+    try:
+        import configparser
+        config_path = os.path.join(os.path.dirname(__file__), "config.ini")
+        config = configparser.ConfigParser()
+        config.read(config_path)
+        default_conf = config['default']
+
+        if 'file_logging' in default_conf and default_conf['file_logging'].lower() == 'false':
+            enable_file_logging = False
+    except Exception:
+        pass
+
+
+check_file_logging()
 
 
 sys.__comfyui_manager_register_message_collapse = register_message_collapse
 sys.__comfyui_manager_is_import_failed_extension = is_import_failed_extension
+cm_global.register_api('cm.register_message_collapse', register_message_collapse)
+cm_global.register_api('cm.is_import_failed_extension', is_import_failed_extension)
+
 
 comfyui_manager_path = os.path.dirname(__file__)
 custom_nodes_path = os.path.abspath(os.path.join(comfyui_manager_path, ".."))
@@ -108,15 +141,33 @@ try:
         postfix = ""
 
     # Logger setup
-    if os.path.exists(f"comfyui{postfix}.log"):
-        if os.path.exists(f"comfyui{postfix}.prev.log"):
-            if os.path.exists(f"comfyui{postfix}.prev2.log"):
-                os.remove(f"comfyui{postfix}.prev2.log")
-            os.rename(f"comfyui{postfix}.prev.log", f"comfyui{postfix}.prev2.log")
-        os.rename(f"comfyui{postfix}.log", f"comfyui{postfix}.prev.log")
+    if enable_file_logging:
+        if os.path.exists(f"comfyui{postfix}.log"):
+            if os.path.exists(f"comfyui{postfix}.prev.log"):
+                if os.path.exists(f"comfyui{postfix}.prev2.log"):
+                    os.remove(f"comfyui{postfix}.prev2.log")
+                os.rename(f"comfyui{postfix}.prev.log", f"comfyui{postfix}.prev2.log")
+            os.rename(f"comfyui{postfix}.log", f"comfyui{postfix}.prev.log")
+
+        log_file = open(f"comfyui{postfix}.log", "w", encoding="utf-8", errors="ignore")
+
+    log_lock = threading.Lock()
 
     original_stdout = sys.stdout
     original_stderr = sys.stderr
+
+    if original_stdout.encoding.lower() == 'utf-8':
+        write_stdout = original_stdout.write
+        write_stderr = original_stderr.write
+    else:
+        def wrapper_stdout(msg):
+            original_stdout.write(msg.encode('utf-8').decode(original_stdout.encoding, errors="ignore"))
+            
+        def wrapper_stderr(msg):
+            original_stderr.write(msg.encode('utf-8').decode(original_stderr.encoding, errors="ignore"))
+
+        write_stdout = wrapper_stdout
+        write_stderr = wrapper_stderr
 
     pat_tqdm = r'\d+%.*\[(.*?)\]'
     pat_import_fail = r'seconds \(IMPORT FAILED\):'
@@ -125,13 +176,11 @@ try:
     is_start_mode = True
     is_import_fail_mode = False
 
-    log_file = open(f"comfyui{postfix}.log", "w", encoding="utf-8")
-    log_lock = threading.Lock()
-
     class ComfyUIManagerLogger:
         def __init__(self, is_stdout):
             self.is_stdout = is_stdout
             self.encoding = "utf-8"
+            self.last_char = ''
 
         def fileno(self):
             try:
@@ -174,7 +223,7 @@ try:
                     if '100%' in message:
                         self.sync_write(message)
                     else:
-                        original_stderr.write(message)
+                        write_stderr(message)
                         original_stderr.flush()
                 else:
                     self.sync_write(message)
@@ -183,16 +232,21 @@ try:
 
         def sync_write(self, message):
             with log_lock:
-                log_file.write(message)
+                timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')[:-3]
+                if self.last_char != '\n':
+                    log_file.write(message)
+                else:
+                    log_file.write(f"[{timestamp}] {message}")
                 log_file.flush()
+                self.last_char = message if message == '' else message[-1]
 
             with std_log_lock:
                 if self.is_stdout:
-                    original_stdout.write(message)
+                    write_stdout(message)
                     original_stdout.flush()
                     terminal_hook.write_stderr(message)
                 else:
-                    original_stderr.write(message)
+                    write_stderr(message)
                     original_stderr.flush()
                     terminal_hook.write_stdout(message)
 
@@ -221,11 +275,16 @@ try:
         sys.stderr = original_stderr
         sys.stdout = original_stdout
         log_file.close()
-        
-    sys.stdout = ComfyUIManagerLogger(True)
-    sys.stderr = ComfyUIManagerLogger(False)
 
-    atexit.register(close_log)
+
+    if enable_file_logging:
+        sys.stdout = ComfyUIManagerLogger(True)
+        sys.stderr = ComfyUIManagerLogger(False)
+
+        atexit.register(close_log)
+    else:
+        sys.stdout.close_log = lambda: None
+
 except Exception as e:
     print(f"[ComfyUI-Manager] Logging failed: {e}")
 
@@ -234,7 +293,11 @@ print("** ComfyUI startup time:", datetime.datetime.now())
 print("** Platform:", platform.system())
 print("** Python version:", sys.version)
 print("** Python executable:", sys.executable)
-print("** Log path:", os.path.abspath('comfyui.log'))
+
+if enable_file_logging:
+    print("** Log path:", os.path.abspath('comfyui.log'))
+else:
+    print("** Log path: file logging is disabled")
 
 
 def check_bypass_ssl():
@@ -322,7 +385,7 @@ if os.path.exists(restore_snapshot_path):
         cmd_str = [sys.executable, git_script_path, '--apply-snapshot', restore_snapshot_path]
         exit_code = process_wrap(cmd_str, custom_nodes_path, handler=msg_capture)
 
-        with open(restore_snapshot_path, 'r', encoding="UTF-8") as json_file:
+        with open(restore_snapshot_path, 'r', encoding="UTF-8", errors="ignore") as json_file:
             info = json.load(json_file)
             for url in cloned_repos:
                 try:
@@ -336,7 +399,7 @@ if os.path.exists(restore_snapshot_path):
                     this_exit_code = 0
 
                     if os.path.exists(requirements_path):
-                        with open(requirements_path, 'r', encoding="UTF-8") as file:
+                        with open(requirements_path, 'r', encoding="UTF-8", errors="ignore") as file:
                             for line in file:
                                 package_name = line.strip()
                                 if package_name and not is_installed(package_name):
@@ -397,7 +460,7 @@ if os.path.exists(script_list_path):
 
     executed = set()
     # Read each line from the file and convert it to a list using eval
-    with open(script_list_path, 'r', encoding="UTF-8") as file:
+    with open(script_list_path, 'r', encoding="UTF-8", errors="ignore") as file:
         for line in file:
             if line in executed:
                 continue
@@ -407,13 +470,16 @@ if os.path.exists(script_list_path):
             try:
                 script = eval(line)
 
-                if script[1].startswith('#'):
+                if script[1].startswith('#') and script[1] != '#FORCE':
                     if script[1] == "#LAZY-INSTALL-SCRIPT":
                         execute_lazy_install_script(script[0], script[2])
 
                 elif os.path.exists(script[0]):
-                    if 'pip' in script[1:] and 'install' in script[1:] and is_installed(script[-1]):
-                        continue
+                    if script[1] == "#FORCE":
+                        del script[1]
+                    else:
+                        if 'pip' in script[1:] and 'install' in script[1:] and is_installed(script[-1]):
+                            continue
 
                     print(f"\n## ComfyUI-Manager: EXECUTE => {script[1:]}")
                     print(f"\n## Execute install/(de)activation script for '{script[0]}'")
@@ -437,3 +503,27 @@ if os.path.exists(script_list_path):
 
 del processed_install
 del pip_list
+
+
+def check_windows_event_loop_policy():
+    try:
+        import configparser
+        config_path = os.path.join(os.path.dirname(__file__), "config.ini")
+        config = configparser.ConfigParser()
+        config.read(config_path)
+        default_conf = config['default']
+
+        if 'windows_selector_event_loop_policy' in default_conf and default_conf['windows_selector_event_loop_policy'].lower() == 'true':
+            try:
+                import asyncio
+                import asyncio.windows_events
+                asyncio.set_event_loop_policy(asyncio.windows_events.WindowsSelectorEventLoopPolicy())
+                print(f"[ComfyUI-Manager] Windows event loop policy mode enabled")
+            except Exception as e:
+                print(f"[ComfyUI-Manager] WARN: Windows initialization fail: {e}")
+    except Exception:
+        pass
+
+
+if platform.system() == 'Windows':
+    check_windows_event_loop_policy()
