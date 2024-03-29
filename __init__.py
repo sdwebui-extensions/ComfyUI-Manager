@@ -566,18 +566,20 @@ def git_pull(path):
     return True
 
 
-async def get_data(uri, silent=False):
+async def get_data(uri, silent=False, timeout=2):
     if not silent:
         print(f"FETCH DATA from: {uri}")
 
     if uri.startswith("http"):
         async with aiohttp.ClientSession(trust_env=True, connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
-            async with session.get(uri, timeout=30) as resp:
+            async with session.get(uri, timeout=timeout) as resp:
                 json_text = await resp.text()
     else:
         with cache_lock:
+            print(f'open {uri} read in')
             with open(uri, "r", encoding="utf-8") as f:
                 json_text = f.read()
+            print(f'open {uri} read out')
 
     json_obj = json.loads(json_text)
     return json_obj
@@ -652,6 +654,8 @@ async def get_data_by_mode(mode, filename):
             uri = get_config()['channel_url'] + '/' + filename
             cache_uri = str(simple_hash(uri))+'_'+filename
             cache_uri = os.path.join(cache_dir, cache_uri)
+            if not os.path.exists(cache_dir):
+                os.makedirs(cache_dir, exist_ok=True)
 
             if mode == "cache":
                 if is_file_created_within_one_day(cache_uri):
@@ -659,14 +663,18 @@ async def get_data_by_mode(mode, filename):
                 else:
                     json_obj = await get_data(uri)
                     with cache_lock:
+                        print(f'open {cache_uri} write in')
                         with open(cache_uri, "w", encoding='utf-8') as file:
                             json.dump(json_obj, file, indent=4, sort_keys=True)
+                        print(f'open {cache_uri} write out')
             else:
                 uri = get_config()['channel_url'] + '/' + filename
                 json_obj = await get_data(uri)
                 with cache_lock:
+                    print(f'open {cache_uri} write in')
                     with open(cache_uri, "w", encoding='utf-8') as file:
                         json.dump(json_obj, file, indent=4, sort_keys=True)
+                    print(f'open {cache_uri} write out')
     except Exception as e:
         print(f"[ComfyUI-Manager] Due to a network error, switching to local mode.\n=> {filename}\n=> {e}")
         uri = os.path.join(comfyui_manager_path, filename)
@@ -719,55 +727,61 @@ def get_model_path(data):
     base_model = get_model_dir(data)
     return os.path.join(base_model, data['filename'])
 
+import time
+custom_nodes = {}
 
 def check_a_custom_node_installed(item, do_fetch=False, do_update_check=True, do_update=False):
     item['installed'] = 'None'
 
     if item['install_type'] == 'git-clone' and len(item['files']) == 1:
+        tic = time.time()
         url = item['files'][0]
 
         if url.endswith("/"):
             url = url[:-1]
 
         dir_name = os.path.splitext(os.path.basename(url))[0].replace(".git", "")
-        for _custom_nodes_path in custom_nodes_paths:
-            dir_path = os.path.join(_custom_nodes_path, dir_name)
-            if os.path.exists(dir_path):
-                try:
-                    item['installed'] = 'True'  # default
-                    if cm_global.try_call(api="cm.is_import_failed_extension", name=dir_name):
+        print(f'check_a_custom_node_installed {dir_name}, {do_update_check}')
+        if dir_name in custom_nodes:
+            dir_path = custom_nodes[dir_name]
+            print(f'{dir_path}: {time.time() - tic}')
+            try:
+                item['installed'] = 'True'  # default
+                if cm_global.try_call(api="cm.is_import_failed_extension", name=dir_name):
+                    item['installed'] = 'Fail'
+                print(f'{dir_path}: {time.time() - tic}')
+                if dir_path.startswith('custom_nodes'):
+                    do_update_check = False
+                if do_update_check:
+                    update_state, success = git_repo_has_updates(dir_path, do_fetch, do_update)
+                    if (do_update_check or do_update) and update_state:
+                        item['installed'] = 'Update'
+                    elif do_update and not success:
                         item['installed'] = 'Fail'
-                    if do_update_check:
-                        update_state, success = git_repo_has_updates(dir_path, do_fetch, do_update)
-                        if (do_update_check or do_update) and update_state:
-                            item['installed'] = 'Update'
-                        elif do_update and not success:
-                            item['installed'] = 'Fail'
-                    # if do_update_check and git_repo_has_updates(dir_path, do_fetch, do_update):
-                    #     item['installed'] = 'Update'
-                    # elif sys.__comfyui_manager_is_import_failed_extension(dir_name):
-                    #     item['installed'] = 'Fail'
-                    # else:
-                    #     item['installed'] = 'True'
-                except:
-                    if cm_global.try_call(api="cm.is_import_failed_extension", name=dir_name):
-                        item['installed'] = 'Fail'
-                    else:
-                        item['installed'] = 'True'
-                    # if sys.__comfyui_manager_is_import_failed_extension(dir_name):
-                    #     item['installed'] = 'Fail'
-                    # else:
-                    #     item['installed'] = 'True'
-                break
+                # if do_update_check and git_repo_has_updates(dir_path, do_fetch, do_update):
+                #     item['installed'] = 'Update'
+                # elif sys.__comfyui_manager_is_import_failed_extension(dir_name):
+                #     item['installed'] = 'Fail'
+                # else:
+                #     item['installed'] = 'True'
+            except:
+                if cm_global.try_call(api="cm.is_import_failed_extension", name=dir_name):
+                    item['installed'] = 'Fail'
+                else:
+                    item['installed'] = 'True'
+                print(f'{dir_path}: {time.time() - tic}')
+                # if sys.__comfyui_manager_is_import_failed_extension(dir_name):
+                #     item['installed'] = 'Fail'
+                # else:
+                #     item['installed'] = 'True'
 
-            elif os.path.exists(dir_path + ".disabled"):
-                item['installed'] = 'Disabled'
-                break
+        elif dir_name+".disabled" in custom_nodes:
+            item['installed'] = 'Disabled'
+        
+        else:
+            item['installed'] = 'False'
 
-            else:
-                item['installed'] = 'False'
-
-    elif item['install_type'] == 'copy' and len(item['files']) == 1:
+    if item['install_type'] == 'copy' and len(item['files']) == 1:
         dir_name = os.path.basename(item['files'][0])
 
         if item['files'][0].endswith('.py'):
@@ -792,10 +806,13 @@ def check_a_custom_node_installed(item, do_fetch=False, do_update_check=True, do
 def check_custom_nodes_installed(json_obj, do_fetch=False, do_update_check=True, do_update=False):
     if do_fetch:
         print("Start fetching...", end="")
-    elif do_update:
+    if do_update:
         print("Start updating...", end="")
-    elif do_update_check:
+    if do_update_check:
         print("Start update check...", end="")
+    for _custom_nodes_path in custom_nodes_paths:
+        for dirname in os.listdir(_custom_nodes_path):
+            custom_nodes[dirname] = os.path.join(_custom_nodes_path, dirname)
 
     def process_custom_node(item):
         check_a_custom_node_installed(item, do_fetch, do_update_check, do_update)
@@ -974,6 +991,7 @@ async def fetch_customnode_list(request):
         channel = get_config()['channel_url']
 
     json_obj = await get_data_by_mode(request.rel_url.query["mode"], 'custom-node-list.json')
+    print(f'/customnode/getlist back')
 
     def is_ignored_notice(code):
         global version
@@ -2440,13 +2458,20 @@ async def default_cache_update():
         uri = 'https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/' + filename
         cache_uri = str(simple_hash(uri)) + '_' + filename
         cache_uri = os.path.join(cache_dir, cache_uri)
+        if not os.path.exists(cache_dir):
+            os.makedirs(cache_dir, exist_ok=True)
 
-        json_obj = await get_data(uri, True)
+        try:
+            json_obj = await get_data(uri, True)
+        except:
+            json_obj = json.load(open(f'custom_nodes/ComfyUI-Manager/{filename}'))
 
         with cache_lock:
+            print(f'open {cache_uri} write in')
             with open(cache_uri, "w", encoding='utf-8') as file:
                 json.dump(json_obj, file, indent=4, sort_keys=True)
                 print(f"[ComfyUI-Manager] default cache updated: {uri}")
+            print(f'open {cache_uri} write out')
 
     a = get_cache("custom-node-list.json")
     b = get_cache("extension-node-map.json")
