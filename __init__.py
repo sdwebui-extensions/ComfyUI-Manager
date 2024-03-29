@@ -572,7 +572,7 @@ async def get_data(uri, silent=False):
 
     if uri.startswith("http"):
         async with aiohttp.ClientSession(trust_env=True, connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
-            async with session.get(uri) as resp:
+            async with session.get(uri, timeout=30) as resp:
                 json_text = await resp.text()
     else:
         with cache_lock:
