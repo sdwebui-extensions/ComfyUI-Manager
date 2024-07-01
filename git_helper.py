@@ -1,16 +1,28 @@
+import subprocess
 import sys
 import os
+import traceback
+
 import git
 import configparser
 import re
 import json
+import yaml
 from torchvision.datasets.utils import download_url
 from tqdm.auto import tqdm
 from git.remote import RemoteProgress
+from comfy.cli_args import args
 
 config_path = os.path.join(os.path.dirname(__file__), "config.ini")
 nodelist_path = os.path.join(os.path.dirname(__file__), "custom-node-list.json")
 working_directory = os.getcwd()
+save_folder = os.path.join(args.data_dir, 'custom_nodes')
+
+if os.path.basename(working_directory) != 'custom_nodes':
+    print(f"WARN: This script should be executed in custom_nodes dir")
+    print(f"DBG: INFO {working_directory}")
+    print(f"DBG: INFO {sys.argv}")
+    # exit(-1)
 
 
 class GitProgress(RemoteProgress):
@@ -132,7 +144,7 @@ def gitpull(path):
 
 
 def checkout_comfyui_hash(target_hash):
-    repo_path = os.path.join(working_directory, '..')  # ComfyUI dir
+    repo_path = os.path.abspath(os.path.join(working_directory, '..'))  # ComfyUI dir
 
     repo = git.Repo(repo_path)
     commit_hash = repo.head.commit.hexsha
@@ -155,55 +167,66 @@ def checkout_custom_node_hash(git_custom_node_infos):
             repo_name = repo_name[:-4]
 
         repo_name_to_url[repo_name] = url
+    
+    for custom_folder in [working_directory, save_folder]:
 
-    for path in os.listdir(working_directory):
-        if path.endswith("ComfyUI-Manager"):
-            continue
+        for path in os.listdir(custom_folder):
+            if path.endswith("ComfyUI-Manager"):
+                continue
 
-        fullpath = os.path.join(working_directory, path)
+            fullpath = os.path.join(custom_folder, path)
 
-        if os.path.isdir(fullpath):
-            is_disabled = path.endswith(".disabled")
+            if os.path.isdir(fullpath):
+                is_disabled = path.endswith(".disabled")
 
-            try:
-                git_dir = os.path.join(fullpath, '.git')
-                if not os.path.exists(git_dir):
-                    continue
+                try:
+                    git_dir = os.path.join(fullpath, '.git')
+                    if not os.path.exists(git_dir):
+                        continue
 
-                need_checkout = False
-                repo_name = os.path.basename(fullpath)
+                    need_checkout = False
+                    repo_name = os.path.basename(fullpath)
 
-                if repo_name.endswith('.disabled'):
-                    repo_name = repo_name[:-9]
+                    if repo_name.endswith('.disabled'):
+                        repo_name = repo_name[:-9]
 
-                item = git_custom_node_infos[repo_name_to_url[repo_name]]
-                if item['disabled'] and is_disabled:
-                    pass
-                elif item['disabled'] and not is_disabled:
-                    # disable
-                    print(f"DISABLE: {repo_name}")
-                    new_path = fullpath + ".disabled"
-                    os.rename(fullpath, new_path)
-                    pass
-                elif not item['disabled'] and is_disabled:
-                    # enable
-                    print(f"ENABLE: {repo_name}")
-                    new_path = fullpath[:-9]
-                    os.rename(fullpath, new_path)
-                    fullpath = new_path
-                    need_checkout = True
-                else:
-                    need_checkout = True
+                    if repo_name not in repo_name_to_url:
+                        if not is_disabled:
+                            # should be disabled
+                            print(f"DISABLE: {repo_name}")
+                            new_path = fullpath + ".disabled"
+                            os.rename(fullpath, new_path)
+                            need_checkout = False
+                    else:
+                        item = git_custom_node_infos[repo_name_to_url[repo_name]]
+                        if item['disabled'] and is_disabled:
+                            pass
+                        elif item['disabled'] and not is_disabled:
+                            # disable
+                            print(f"DISABLE: {repo_name}")
+                            new_path = fullpath + ".disabled"
+                            os.rename(fullpath, new_path)
 
-                if need_checkout:
-                    repo = git.Repo(fullpath)
-                    commit_hash = repo.head.commit.hexsha
+                        elif not item['disabled'] and is_disabled:
+                            # enable
+                            print(f"ENABLE: {repo_name}")
+                            new_path = fullpath[:-9]
+                            os.rename(fullpath, new_path)
+                            fullpath = new_path
+                            need_checkout = True
+                        else:
+                            need_checkout = True
 
-                    if commit_hash != item['hash']:
-                        print(f"CHECKOUT: {repo_name} [{item['hash']}]")
-                        repo.git.checkout(item['hash'])
-            except Exception:
-                print(f"Failed to restore snapshots for the custom node '{path}'")
+                    if need_checkout:
+                        repo = git.Repo(fullpath)
+                        commit_hash = repo.head.commit.hexsha
+
+                        if commit_hash != item['hash']:
+                            print(f"CHECKOUT: {repo_name} [{item['hash']}]")
+                            repo.git.checkout(item['hash'])
+
+                except Exception:
+                    print(f"Failed to restore snapshots for the custom node '{path}'")
 
     # clone missing
     for k, v in git_custom_node_infos.items():
@@ -212,10 +235,10 @@ def checkout_custom_node_hash(git_custom_node_infos):
             if repo_name.endswith('.git'):
                 repo_name = repo_name[:-4]
 
-            path = os.path.join(working_directory, repo_name)
+            path = os.path.join(save_folder, repo_name)
             if not os.path.exists(path):
                 print(f"CLONE: {path}")
-                gitclone(working_directory, k, v['hash'])
+                gitclone(save_folder, k, v['hash'])
 
 
 def invalidate_custom_node_file(file_custom_node_infos):
@@ -226,21 +249,22 @@ def invalidate_custom_node_file(file_custom_node_infos):
         if not item['disabled']:
             enabled_set.add(item['filename'])
 
-    for path in os.listdir(working_directory):
-        fullpath = os.path.join(working_directory, path)
+    for custom_folder in [working_directory, save_folder]:
+        for path in os.listdir(custom_folder):
+            fullpath = os.path.join(custom_folder, path)
 
-        if not os.path.isdir(fullpath) and fullpath.endswith('.py'):
-            if path not in enabled_set:
-                print(f"DISABLE: {path}")
-                new_path = fullpath+'.disabled'
-                os.rename(fullpath, new_path)
+            if not os.path.isdir(fullpath) and fullpath.endswith('.py'):
+                if path not in enabled_set:
+                    print(f"DISABLE: {path}")
+                    new_path = fullpath+'.disabled'
+                    os.rename(fullpath, new_path)
 
-        elif not os.path.isdir(fullpath) and fullpath.endswith('.py.disabled'):
-            path = path[:-9]
-            if path in enabled_set:
-                print(f"ENABLE: {path}")
-                new_path = fullpath[:-9]
-                os.rename(fullpath, new_path)
+            elif not os.path.isdir(fullpath) and fullpath.endswith('.py.disabled'):
+                path = path[:-9]
+                if path in enabled_set:
+                    print(f"ENABLE: {path}")
+                    new_path = fullpath[:-9]
+                    os.rename(fullpath, new_path)
 
     # download missing: just support for 'copy' style
     py_to_url = {}
@@ -269,8 +293,21 @@ def apply_snapshot(target):
     try:
         path = os.path.join(os.path.dirname(__file__), 'snapshots', f"{target}")
         if os.path.exists(path):
-            with open(path, 'r', encoding="UTF-8") as json_file:
-                info = json.load(json_file)
+            if not target.endswith('.json') and not target.endswith('.yaml'):
+                print(f"Snapshot file not found: `{path}`")
+                print("APPLY SNAPSHOT: False")
+                return None
+
+            with open(path, 'r', encoding="UTF-8") as snapshot_file:
+                if target.endswith('.json'):
+                    info = json.load(snapshot_file)
+                elif target.endswith('.yaml'):
+                    info = yaml.load(snapshot_file, Loader=yaml.SafeLoader)
+                    info = info['custom_nodes']
+                else:
+                    # impossible case
+                    print("APPLY SNAPSHOT: False")
+                    return None
 
                 comfyui_hash = info['comfyui']
                 git_custom_node_infos = info['git_custom_nodes']
@@ -281,13 +318,80 @@ def apply_snapshot(target):
                 invalidate_custom_node_file(file_custom_node_infos)
 
                 print("APPLY SNAPSHOT: True")
-                return
+                if 'pips' in info:
+                    return info['pips']
+                else:
+                    return None
 
         print(f"Snapshot file not found: `{path}`")
         print("APPLY SNAPSHOT: False")
+
+        return None
     except Exception as e:
         print(e)
+        traceback.print_exc()
         print("APPLY SNAPSHOT: False")
+
+        return None
+
+
+def restore_pip_snapshot(pips, options):
+    non_url = []
+    local_url = []
+    non_local_url = []
+    for k, v in pips.items():
+        if v == "":
+            non_url.append(k)
+        else:
+            if v.startswith('file:'):
+                local_url.append(v)
+            else:
+                non_local_url.append(v)
+
+    failed = []
+    if '--pip-non-url' in options:
+        # try all at once
+        res = 1
+        try:
+            res = subprocess.check_call([sys.executable, '-m', 'pip', 'install'] + non_url)
+        except:
+            pass
+
+        # fallback
+        if res != 0:
+            for x in non_url:
+                res = 1
+                try:
+                    res = subprocess.check_call([sys.executable, '-m', 'pip', 'install', x])
+                except:
+                    pass
+
+                if res != 0:
+                    failed.append(x)
+
+    if '--pip-non-local-url' in options:
+        for x in non_local_url:
+            res = 1
+            try:
+                res = subprocess.check_call([sys.executable, '-m', 'pip', 'install', x])
+            except:
+                pass
+
+            if res != 0:
+                failed.append(x)
+
+    if '--pip-local-url' in options:
+        for x in local_url:
+            res = 1
+            try:
+                res = subprocess.check_call([sys.executable, '-m', 'pip', 'install', x])
+            except:
+                pass
+
+            if res != 0:
+                failed.append(x)
+
+    print(f"Installation failed for pip packages: {failed}")
 
 
 def setup_environment():
@@ -310,7 +414,15 @@ try:
     elif sys.argv[1] == "--pull":
         gitpull(sys.argv[2])
     elif sys.argv[1] == "--apply-snapshot":
-        apply_snapshot(sys.argv[2])
+        options = set()
+        for x in sys.argv:
+            if x in ['--pip-non-url', '--pip-local-url', '--pip-non-local-url']:
+                options.add(x)
+
+        pips = apply_snapshot(sys.argv[2])
+
+        if pips and len(options) > 0:
+            restore_pip_snapshot(pips, options)
     sys.exit(0)
 except Exception as e:
     print(e)

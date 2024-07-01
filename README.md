@@ -5,10 +5,11 @@
 ![menu](misc/menu.jpg)
 
 ## NOTICE
-* 🏆 Join us for the [ComfyUI Workflow Contest](https://contest.openart.ai/), hosted by OpenArt AI (11.27.2023 - 12.15.2023). Our esteemed judge panel includes Scott E. Detweiler, Olivio Sarikas, MERJIC麦橘, among others. We're also thrilled to have the authors of ComfyUI Manager and AnimateDiff as our special guests!
-* If you wish to hide the "Share" button, click "Manager" and choose "Share: None" option.
+* V2.37 Show a ✅ mark to accounts that have been active on GitHub for more than six months.
+* V2.33 Security policy is applied.
+* V2.21 [cm-cli](docs/en/cm-cli.md) tool is added.
+* V2.18 to V2.18.3 is not functioning due to a severe bug. Users on these versions are advised to promptly update to V2.18.4. Please navigate to the `ComfyUI/custom_nodes/ComfyUI-Manager` directory and execute `git pull` to update.
 * You can see whole nodes info on [ComfyUI Nodes Info](https://ltdrdata.github.io/) page.
-* Versions prior to V0.22.2 will no longer detect missing nodes unless using a local database. Please update ComfyUI-Manager to the latest version.
 
 ## Installation
 
@@ -32,10 +33,32 @@ To install ComfyUI-Manager in addition to an existing installation of ComfyUI, y
 ![portable-install](misc/portable-install.png)
 
 
-### Installation[method3] (Installation for linux+venv: ComfyUI + ComfyUI-Manager)
+### Installation[method3] (Installation through comfy-cli: install ComfyUI and ComfyUI-Manager at once.)  
+> RECOMMENDED: comfy-cli provides various features to manage ComfyUI from the CLI.
+
+* **prerequisite: python 3, git**
+
+Windows:
+```commandline
+python -m venv venv
+venv\Scripts\activate
+pip install comfy-cli
+comfy install
+```
+
+Linux/OSX:
+```commandline
+python -m venv venv
+. venv/bin/activate
+pip install comfy-cli
+comfy install
+```
+
+
+### Installation[method4] (Installation for linux+venv: ComfyUI + ComfyUI-Manager)
 
 To install ComfyUI with ComfyUI-Manager on Linux using a venv environment, you can follow these steps:
-prerequisite: python-is-python3, python3-venv
+* **prerequisite: python-is-python3, python3-venv, git**
 
 1. Download [scripts/install-comfyui-venv-linux.sh](https://github.com/ltdrdata/ComfyUI-Manager/raw/main/scripts/install-comfyui-venv-linux.sh) into empty install directory
 - ComfyUI will be installed in the subdirectory of the specified directory, and the directory will contain the generated executable script.
@@ -63,6 +86,8 @@ This repository provides Colab notebooks that allow you to install and use Comfy
 * Support for automatically installing dependencies of custom nodes upon restarting Colab notebooks.
 
 ## Changes
+* **2.38** `Install Custom Nodes` menu is changed to `Custom Nodes Manager`.
+* **2.21** [cm-cli](docs/en/cm-cli.md) tool is added.
 * **2.4** Copy the connections of the nearest node by double-clicking.
 * **2.2.3** Support Components System
 * **0.29** Add `Update all` feature
@@ -153,15 +178,22 @@ This repository provides Colab notebooks that allow you to install and use Comfy
 * Press the "Restore" button to revert to the installation status of the respective snapshot.
   * However, for custom nodes not managed by Git, snapshot support is incomplete.
 * When you press `Restore`, it will take effect on the next ComfyUI startup.
-
+  * The selected snapshot file is saved in `ComfyUI-Manager/startup-scripts/restore-snapshot.json`, and upon restarting ComfyUI, the snapshot is applied and then deleted.
 
 ![model-install-dialog](misc/snapshot.jpg)
+
+
+## cm-cli: command line tools for power user
+* A tool is provided that allows you to use the features of ComfyUI-Manager without running ComfyUI.
+* For more details, please refer to the [cm-cli documentation](docs/en/cm-cli.md).
+
 
 ## How to register your custom node into ComfyUI-Manager
 
 * Add an entry to `custom-node-list.json` located in the root of ComfyUI-Manager and submit a Pull Request.
 * NOTE: Before submitting the PR after making changes, please check `Use local DB` and ensure that the extension list loads without any issues in the `Install custom nodes` dialog. Occasionally, missing or extra commas can lead to JSON syntax errors.
 * The remaining JSON will be updated through scripts in the future, so you don't need to worry about it.
+
 
 ## Custom node support guide
 
@@ -247,11 +279,11 @@ NODE_CLASS_MAPPINGS.update({
 
 ## Support of missing nodes installation
 
-![missing-menu](misc/missing-menu.png)
+![missing-menu](misc/missing-menu.jpg)
 
 * When you click on the ```Install Missing Custom Nodes``` button in the menu, it displays a list of extension nodes that contain nodes not currently present in the workflow.
 
-![missing-list](misc/missing-list.png)
+![missing-list](misc/missing-list.jpg)
 
 
 ## Additional Feature
@@ -272,6 +304,35 @@ NODE_CLASS_MAPPINGS.update({
     
   * `Possible(left) + Copy(right)`: When you Double-Click on the left half of the title, it operates as `Possible Input Connections`, and when you Double-Click on the right half, it operates as `Copy All Connections`.
 
+* Prevent downgrade of specific packages
+  * List the package names in the `downgrade_blacklist` section of the `config.ini` file, separating them with commas.
+    * e.g
+    ```
+      downgrade_blacklist = diffusers, kornia
+    ```
+
+* Custom pip mapping
+  * When you create the `pip_overrides.json` file, it changes the installation of specific pip packages to installations defined by the user.
+    * Please refer to the `pip_overrides.json.template` file.
+    
+* Use `aria2` as downloader
+  * [howto](docs/en/use_aria2.md)
+
+## Scanner
+When you run the `scan.sh` script:
+
+* It updates the `extension-node-map.json`.
+  * To do this, it pulls or clones the custom nodes listed in `custom-node-list.json` into `~/.tmp/default`.
+  * To skip this step, add the `--skip-update` option.
+  * If you want to specify a different path instead of `~/.tmp/default`, run `python scanner.py [path]` directly instead of `scan.sh`.
+
+* It updates the `github-stats.json`.
+  * This uses the GitHub API, so set your token with `export GITHUB_TOKEN=your_token_here` to avoid quickly reaching the rate limit and malfunctioning.
+  * To skip this step, add the `--skip-update-stat` option.
+
+* The `--skip-all` option applies both `--skip-update` and `--skip-stat-update`.
+
+
 ## Troubleshooting
 * If your `git.exe` is installed in a specific location other than system git, please install ComfyUI-Manager and run ComfyUI. Then, specify the path including the file name in `git_exe = ` in the ComfyUI-Manager/config.ini file that is generated.
 * If updating ComfyUI-Manager itself fails, please go to the **ComfyUI-Manager** directory and execute the command `git update-ref refs/remotes/origin/main a361cc1 && git fetch --all && git pull`.
@@ -281,6 +342,32 @@ NODE_CLASS_MAPPINGS.update({
 * Currently, `vid2vid` is not being updated, causing compatibility issues.
 * If you encounter the error message `Overlapped Object has pending operation at deallocation on Comfyui Manager load` under Windows
   * Edit `config.ini` file: add `windows_selector_event_loop_policy = True`
+* if `SSL: CERTIFICATE_VERIFY_FAILED` error is occured.
+  * Edit `config.ini` file: add `bypass_ssl = True`
+
+## Security policy
+  * Edit `config.ini` file: add `security_level = <LEVEL>`
+    * `strong`
+      * doesn't allow `high` and `middle` level risky feature
+    * `normal`
+      * doesn't allow `high` level risky feature if `--listen` is specified and not starts with `127.`
+      * `middle` level risky feature is available
+    * `weak`
+      * all feature is available
+    
+  * `high` level risky features
+    * `Install via git url`, `pip install`
+    * Installation of custom nodes registered not in the `default channel`.
+    * Display terminal log
+  
+  * `middle` level risky features
+    * Uninstall/Update/Fix custom nodes
+    * Installation of custom nodes registered in the `default channel`.
+    * Restore/Remove Snapshot
+    * Restart
+  
+  * `low` level risky features
+    * Update ComfyUI
 
 
 ## TODO: Unconventional form of custom node list
@@ -291,7 +378,13 @@ NODE_CLASS_MAPPINGS.update({
 * https://github.com/StartHua/Comfyui_GPT_Story
 * https://github.com/NielsGercama/comfyui_customsampling
 * https://github.com/wrightdaniel2017/ComfyUI-VideoLipSync
-
+* https://github.com/bxdsjs/ComfyUI-Image-preprocessing
+* https://github.com/SMUELDigital/ComfyUI-ONSET
+* https://github.com/SimithWang/comfyui-renameImages
+* https://github.com/icefairy64/comfyui-model-tilt
+* https://github.com/andrewharp/ComfyUI-EasyNodes
+* https://github.com/SimithWang/comfyui-renameImages
+* https://github.com/Tcheko243/ComfyUI-Photographer-Alpha7-Nodes
 
 ## Roadmap
 
@@ -303,9 +396,10 @@ NODE_CLASS_MAPPINGS.update({
 - [ ] Auto migration for custom nodes with changed structures.
 - [ ] Version control feature for nodes.
 - [ ] List of currently used custom nodes.
-- [ ] Download support multiple model download.
-- [ ] Model download via url.
-- [ ] List sorting.
+- [x] Download support multiple model download.
+- [x] Model download via url.
+- [x] List sorting (custom nodes).
+- [x] List sorting (model).
 - [ ] Provides description of node.
 
 
