@@ -15,7 +15,7 @@ import shutil
 import git
 
 from server import PromptServer
-import manager_core as core
+from . import manager_core as core
 import cm_global
 
 print(f"### Loading: ComfyUI-Manager ({core.version_str})")
