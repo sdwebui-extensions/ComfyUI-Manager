@@ -14,6 +14,7 @@ from rich import print
 from typing_extensions import List, Annotated
 import re
 import git
+from comfy.cli_args import args
 
 sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.join(os.path.dirname(__file__), "glob"))
@@ -225,6 +226,9 @@ def install_node(node_name, is_all=False, cnt_msg=''):
 
 
 def reinstall_node(node_name, is_all=False, cnt_msg=''):
+    if args.just_ui:
+        print("reinstall nodes in cluster mode is not allowed")
+        return None
     node_path, node_item = cm_ctx.lookup_node_path(node_name)
 
     if os.path.exists(node_path):
@@ -252,6 +256,9 @@ def fix_node(node_name, is_all=False, cnt_msg=''):
 
 
 def uninstall_node(node_name, is_all=False, cnt_msg=''):
+    if args.just_ui:
+        print("uninstall nodes in cluster mode is not allowed")
+        return None
     node_path, node_item = cm_ctx.lookup_node_path(node_name, robust=True)
 
     files = node_item['files'] if node_item is not None else [node_path]
@@ -267,6 +274,9 @@ def uninstall_node(node_name, is_all=False, cnt_msg=''):
 
 
 def update_node(node_name, is_all=False, cnt_msg=''):
+    if args.just_ui:
+        print("update nodes in cluster mode is not allowed")
+        return None
     node_path, node_item = cm_ctx.lookup_node_path(node_name, robust=True)
 
     files = node_item['files'] if node_item is not None else [node_path]

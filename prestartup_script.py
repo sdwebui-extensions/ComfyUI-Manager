@@ -171,6 +171,7 @@ try:
     # Logger setup
     if enable_file_logging:
         if os.path.exists(f"comfyui{postfix}.log"):
+            os.remove(f"comfyui{postfix}.log")
             if os.path.exists(f"comfyui{postfix}.prev.log"):
                 if os.path.exists(f"comfyui{postfix}.prev2.log"):
                     os.remove(f"comfyui{postfix}.prev2.log")
