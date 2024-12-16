@@ -1,4 +1,3 @@
-import mimetypes
 import traceback
 
 import folder_paths
@@ -6,7 +5,6 @@ import locale
 import subprocess  # don't remove this
 import concurrent
 import nodes
-import hashlib
 import os
 import sys
 import threading
@@ -22,6 +20,9 @@ print(f"### Loading: ComfyUI-Manager ({core.version_str})")
 
 comfy_ui_hash = "-"
 
+SECURITY_MESSAGE_MIDDLE_OR_BELOW = f"ERROR: To use this action, a security_level of `middle or below` is required. Please contact the administrator.\nReference: https://github.com/ltdrdata/ComfyUI-Manager#security-policy"
+SECURITY_MESSAGE_NORMAL_MINUS = f"ERROR: To use this feature, you must either set '--listen' to a local IP and set the security level to 'normal-' or lower, or set the security level to 'middle' or 'weak'. Please contact the administrator.\nReference: https://github.com/ltdrdata/ComfyUI-Manager#security-policy"
+SECURITY_MESSAGE_GENERAL = f"ERROR: This installation is not allowed in this security_level. Please contact the administrator.\nReference: https://github.com/ltdrdata/ComfyUI-Manager#security-policy"
 
 def handle_stream(stream, prefix):
     stream.reconfigure(encoding=locale.getpreferredencoding(), errors='replace')
@@ -46,7 +47,9 @@ is_local_mode = args.listen.startswith('127.') or args.listen.startswith('local.
 
 
 def is_allowed_security_level(level):
-    if level == 'high':
+    if level == 'block':
+        return False
+    elif level == 'high':
         if is_local_mode:
             return core.get_config()['security_level'].lower() in ['weak', 'normal-']
         else:
@@ -57,9 +60,9 @@ def is_allowed_security_level(level):
         return True
 
 
-async def get_risky_level(files):
+async def get_risky_level(files, pip_packages):
     json_data1 = await core.get_data_by_mode('local', 'custom-node-list.json')
-    json_data2 = await core.get_data_by_mode('cache', 'custom-node-list.json', channel_url='https://github.com/ltdrdata/ComfyUI-Manager/raw/main/custom-node-list.json')
+    json_data2 = await core.get_data_by_mode('cache', 'custom-node-list.json', channel_url='https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main')
 
     all_urls = set()
     for x in json_data1['custom_nodes'] + json_data2['custom_nodes']:
@@ -68,6 +71,15 @@ async def get_risky_level(files):
     for x in files:
         if x not in all_urls:
             return "high"
+
+    all_pip_packages = set()
+    for x in json_data1['custom_nodes'] + json_data2['custom_nodes']:
+        if "pip" in x:
+            all_pip_packages.update(x['pip'])
+
+    for p in pip_packages:
+        if p not in all_pip_packages:
+            return "block"
 
     return "middle"
 
@@ -169,7 +181,7 @@ def print_comfyui_version():
 
         try:
             if core.comfy_ui_commit_datetime.date() < core.comfy_ui_required_commit_datetime.date():
-                print(f"\n\n## [WARN] ComfyUI-Manager: Your ComfyUI version ({core.comfy_ui_revision})[{core.comfy_ui_commit_datetime.date()}] is too old. Please update to the latest version. ##\n\n")
+                print(f"\n\n## [WARN] ComfyUI-Manager: Your ComfyUI version ({core.get_comfyui_tag()})[{core.comfy_ui_commit_datetime.date()}] is too old. Please update to the latest version. ##\n\n")
         except:
             pass
 
@@ -188,7 +200,11 @@ def print_comfyui_version():
         # <--
 
         if current_branch == "master":
-            print(f"### ComfyUI Revision: {core.comfy_ui_revision} [{comfy_ui_hash[:8]}] | Released on '{core.comfy_ui_commit_datetime.date()}'")
+            version_tag = core.get_comfyui_tag()
+            if version_tag is None:
+                print(f"### ComfyUI Revision: {core.comfy_ui_revision} [{comfy_ui_hash[:8]}] | Released on '{core.comfy_ui_commit_datetime.date()}'")
+            else:
+                print(f"### ComfyUI Version: {core.get_comfyui_tag()} | Released on '{core.comfy_ui_commit_datetime.date()}'")
         else:
             print(f"### ComfyUI Revision: {core.comfy_ui_revision} on '{current_branch}' [{comfy_ui_hash[:8]}] | Released on '{core.comfy_ui_commit_datetime.date()}'")
     except:
@@ -236,21 +252,45 @@ import urllib.request
 
 
 def get_model_dir(data):
+    if 'download_model_base' in folder_paths.folder_names_and_paths:
+        models_base = folder_paths.folder_names_and_paths['download_model_base'][0][0]
+    else:
+        models_base = folder_paths.models_dir
+
+    def resolve_custom_node(save_path):
+        save_path = save_path[13:] # remove 'custom_nodes/'
+        repo_name = save_path.replace('\\','/').split('/')[0] # get custom node repo name
+        repo_path = core.lookup_installed_custom_nodes(repo_name)
+        if repo_path is not None and repo_path[0]:
+            # Returns the retargeted path based on the actually installed repository
+            return os.path.join(os.path.dirname(repo_path[1]), save_path)
+        else:
+            return None
+
     if data['save_path'] != 'default':
         if '..' in data['save_path'] or data['save_path'].startswith('/'):
             print(f"[WARN] '{data['save_path']}' is not allowed path. So it will be saved into 'models/etc'.")
-            base_model = "etc"
+            base_model = os.path.join(models_base, "etc")
         else:
             if data['save_path'].startswith("custom_nodes"):
-                base_model = os.path.join(core.comfy_path, data['save_path'])
+                base_model = resolve_custom_node(data['save_path'])
+                if base_model is None:
+                    print(f"[ComfyUI-Manager] The target custom node for model download is not installed: {data['save_path']}")
+                    return None
             else:
-                base_model = os.path.join(folder_paths.models_dir, data['save_path'])
+                base_model = os.path.join(models_base, data['save_path'])
     else:
         model_type = data['type']
-        if model_type == "checkpoints":
+        if model_type == "checkpoints" or model_type == "checkpoint":
             base_model = folder_paths.folder_names_and_paths["checkpoints"][0][0]
         elif model_type == "unclip":
             base_model = folder_paths.folder_names_and_paths["checkpoints"][0][0]
+        elif model_type == "clip" or model_type == "text_encoders":
+            if folder_paths.folder_names_and_paths.get("text_encoders"):
+                base_model = folder_paths.folder_names_and_paths["text_encoders"][0][0]
+            else:
+                print(f"[ComfyUI-Manager] Your ComfyUI is outdated version.")
+                base_model = folder_paths.folder_names_and_paths["clip"][0][0]  # outdated version
         elif model_type == "VAE":
             base_model = folder_paths.folder_names_and_paths["vae"][0][0]
         elif model_type == "lora":
@@ -269,15 +309,24 @@ def get_model_dir(data):
             base_model = folder_paths.folder_names_and_paths["upscale_models"][0][0]
         elif model_type == "embeddings":
             base_model = folder_paths.folder_names_and_paths["embeddings"][0][0]
+        elif model_type == "unet" or model_type == "diffusion_model":
+            if folder_paths.folder_names_and_paths.get("diffusion_models"):
+                base_model = folder_paths.folder_names_and_paths["diffusion_models"][0][1]
+            else:
+                print(f"[ComfyUI-Manager] Your ComfyUI is outdated version.")
+                base_model = folder_paths.folder_names_and_paths["unet"][0][0]  # outdated version
         else:
-            base_model = "etc"
+            base_model = os.path.join(models_base, "etc")
 
     return base_model
 
 
 def get_model_path(data):
     base_model = get_model_dir(data)
-    return os.path.join(base_model, data['filename'])
+    if base_model is None:
+        return None
+    else:
+        return os.path.join(base_model, data['filename'])
 
 
 def check_custom_nodes_installed(json_obj, do_fetch=False, do_update_check=True, do_update=False):
@@ -388,7 +437,7 @@ async def fetch_updates(request):
 @PromptServer.instance.routes.get("/customnode/update_all")
 async def update_all(request):
     if not is_allowed_security_level('middle'):
-        print(f"ERROR: To use this action, a security_level of `middle or below` is required. Please contact the administrator.")
+        print(SECURITY_MESSAGE_MIDDLE_OR_BELOW)
         return web.Response(status=403)
 
     try:
@@ -590,7 +639,7 @@ async def get_snapshot_list(request):
 @PromptServer.instance.routes.get("/snapshot/remove")
 async def remove_snapshot(request):
     if not is_allowed_security_level('middle'):
-        print(f"ERROR: To use this action, a security_level of `middle or below` is required. Please contact the administrator.")
+        print(SECURITY_MESSAGE_MIDDLE_OR_BELOW)
         return web.Response(status=403)
     
     try:
@@ -608,7 +657,7 @@ async def remove_snapshot(request):
 @PromptServer.instance.routes.get("/snapshot/restore")
 async def remove_snapshot(request):
     if not is_allowed_security_level('middle'):
-        print(f"ERROR: To use this action, a security_level of `middle or below` is required.  Please contact the administrator.")
+        print(SECURITY_MESSAGE_MIDDLE_OR_BELOW)
         return web.Response(status=403)
     
     try:
@@ -777,14 +826,14 @@ def copy_set_active(files, is_disable, js_path_name='.'):
 @PromptServer.instance.routes.post("/customnode/install")
 async def install_custom_node(request):
     if not is_allowed_security_level('middle'):
-        print(f"ERROR: To use this action, a security_level of `middle or below` is required.  Please contact the administrator.")
+        print(SECURITY_MESSAGE_MIDDLE_OR_BELOW)
         return web.Response(status=403)
 
     json_data = await request.json()
 
-    risky_level = await get_risky_level(json_data['files'])
+    risky_level = await get_risky_level(json_data['files'], json_data.get('pip', []))
     if not is_allowed_security_level(risky_level):
-        print(f"ERROR: This installation is not allowed in this security_level.  Please contact the administrator.")
+        print(SECURITY_MESSAGE_GENERAL)
         return web.Response(status=404)
 
     install_type = json_data['install_type']
@@ -800,7 +849,14 @@ async def install_custom_node(request):
         res = unzip_install(json_data['files'])
 
     if install_type == "copy":
-        js_path_name = json_data['js_path'] if 'js_path' in json_data else '.'
+        if 'js_path' in json_data:
+            if '.' in json_data['js_path'] or ':' in json_data['js_path'] or json_data['js_path'].startswith('/'):
+                print(f"[ComfyUI Manager] An abnormal JS path has been transmitted. This could be the result of a security attack.\n{json_data['js_path']}")
+                return web.Response(status=400)
+            else:
+                js_path_name = json_data['js_path']
+        else:
+            js_path_name = '.'
         res = copy_install(json_data['files'], js_path_name)
 
     elif install_type == "git-clone":
@@ -824,7 +880,7 @@ async def install_custom_node(request):
 @PromptServer.instance.routes.post("/customnode/fix")
 async def fix_custom_node(request):
     if not is_allowed_security_level('middle'):
-        print(f"ERROR: To use this action, a security_level of `middle or below` is required. Please contact the administrator.")
+        print(SECURITY_MESSAGE_GENERAL)
         return web.Response(status=403)
 
     json_data = await request.json()
@@ -844,9 +900,17 @@ async def fix_custom_node(request):
         return web.Response(status=400)
 
     if 'pip' in json_data:
+        if not is_allowed_security_level('high'):
+            print(SECURITY_MESSAGE_GENERAL)
+            return web.Response(status=403)
+
         for pname in json_data['pip']:
             install_cmd = [sys.executable, "-m", "pip", "install", '-U', pname]
             core.try_install_script(json_data['files'][0], ".", install_cmd)
+
+    # HOTFIX: force downgrade to numpy<2
+    install_cmd = [sys.executable, "-m", "pip", "install", "numpy<2"]
+    core.try_install_script(json_data['files'][0], ".", install_cmd)
 
     if res:
         print(f"After restarting ComfyUI, please refresh the browser.")
@@ -858,7 +922,7 @@ async def fix_custom_node(request):
 @PromptServer.instance.routes.post("/customnode/install/git_url")
 async def install_custom_node_git_url(request):
     if not is_allowed_security_level('high'):
-        print(f"ERROR: To use this feature, you must either set '--listen' to a local IP and set the security level to 'normal-' or lower, or set the security level to 'middle' or 'weak'. Please contact the administrator.")
+        print(SECURITY_MESSAGE_NORMAL_MINUS)
         return web.Response(status=403)
 
     url = await request.text()
@@ -874,7 +938,7 @@ async def install_custom_node_git_url(request):
 @PromptServer.instance.routes.post("/customnode/install/pip")
 async def install_custom_node_git_url(request):
     if not is_allowed_security_level('high'):
-        print(f"ERROR: To use this feature, you must either set '--listen' to a local IP and set the security level to 'normal-' or lower, or set the security level to 'middle' or 'weak'. Please contact the administrator.")
+        print(SECURITY_MESSAGE_NORMAL_MINUS)
         return web.Response(status=403)
 
     packages = await request.text()
@@ -886,7 +950,7 @@ async def install_custom_node_git_url(request):
 @PromptServer.instance.routes.post("/customnode/uninstall")
 async def uninstall_custom_node(request):
     if not is_allowed_security_level('middle'):
-        print(f"ERROR: To use this action, a security_level of `middle or below` is required.  Please contact the administrator.")
+        print(SECURITY_MESSAGE_MIDDLE_OR_BELOW)
         return web.Response(status=403)
 
     json_data = await request.json()
@@ -914,7 +978,7 @@ async def uninstall_custom_node(request):
 @PromptServer.instance.routes.post("/customnode/update")
 async def update_custom_node(request):
     if not is_allowed_security_level('middle'):
-        print(f"ERROR: To use this action, a security_level of `middle or below` is required. Please contact the administrator.")
+        print(SECURITY_MESSAGE_MIDDLE_OR_BELOW)
         return web.Response(status=403)
 
     json_data = await request.json()
@@ -986,7 +1050,7 @@ async def install_model(request):
     model_path = get_model_path(json_data)
 
     if not is_allowed_security_level('middle'):
-        print(f"ERROR: To use this action, a security_level of `middle or below` is required. Please contact the administrator.")
+        print(SECURITY_MESSAGE_MIDDLE_OR_BELOW)
         return web.Response(status=403)
 
     if not json_data['filename'].endswith('.safetensors') and not is_allowed_security_level('high'):
@@ -999,7 +1063,7 @@ async def install_model(request):
                 break
 
         if not is_belongs_to_whitelist:
-            print(f"ERROR: To use this feature, you must either set '--listen' to a local IP and set the security level to 'normal-' or lower, or set the security level to 'middle' or 'weak'. Please contact the administrator.")
+            print(SECURITY_MESSAGE_NORMAL_MINUS)
             return web.Response(status=403)
 
     res = False
@@ -1033,32 +1097,6 @@ async def install_model(request):
         print(f"[ERROR] {e}", file=sys.stderr)
 
     return web.Response(status=400)
-
-
-class ManagerTerminalHook:
-    def write_stderr(self, msg):
-        PromptServer.instance.send_sync("manager-terminal-feedback", {"data": msg})
-
-    def write_stdout(self, msg):
-        PromptServer.instance.send_sync("manager-terminal-feedback", {"data": msg})
-
-
-manager_terminal_hook = ManagerTerminalHook()
-
-
-@PromptServer.instance.routes.get("/manager/terminal")
-async def terminal_mode(request):
-    if not is_allowed_security_level('high'):
-        print(f"ERROR: To use this feature, you must either set '--listen' to a local IP and set the security level to 'normal-' or lower, or set the security level to 'middle' or 'weak'. Please contact the administrator.")
-        return web.Response(status=403)
-
-    if "mode" in request.rel_url.query:
-        if request.rel_url.query['mode'] == 'true':
-            sys.__comfyui_manager_terminal_hook.add_hook('cm', manager_terminal_hook)
-        else:
-            sys.__comfyui_manager_terminal_hook.remove_hook('cm')
-
-    return web.Response(status=200)
 
 
 @PromptServer.instance.routes.get("/manager/preview_method")
@@ -1169,14 +1207,21 @@ async def get_notice(request):
 
                 if match:
                     markdown_content = match.group(1)
-                    markdown_content += f"<HR>ComfyUI: {core.comfy_ui_revision}[{comfy_ui_hash[:6]}]({core.comfy_ui_commit_datetime.date()})"
+                    version_tag = core.get_comfyui_tag()
+                    if version_tag is None:
+                        markdown_content += f"<HR>ComfyUI: {core.comfy_ui_revision}[{comfy_ui_hash[:6]}]({core.comfy_ui_commit_datetime.date()})"
+                    else:
+                        markdown_content += (f"<HR>ComfyUI: {version_tag}<BR>"
+                                             f"&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;({core.comfy_ui_commit_datetime.date()})")
                     # markdown_content += f"<BR>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;()"
                     markdown_content += f"<BR>Manager: {core.version_str}"
 
                     markdown_content = add_target_blank(markdown_content)
 
                     try:
-                        if core.comfy_ui_required_commit_datetime.date() > core.comfy_ui_commit_datetime.date():
+                        if core.comfy_ui_commit_datetime == datetime(1900, 1, 1, 0, 0, 0):
+                            markdown_content = f'<P style="text-align: center; color:red; background-color:white; font-weight:bold">Your ComfyUI isn\'t git repo.</P>' + markdown_content
+                        elif core.comfy_ui_required_commit_datetime.date() > core.comfy_ui_commit_datetime.date():
                             markdown_content = f'<P style="text-align: center; color:red; background-color:white; font-weight:bold">Your ComfyUI is too OUTDATED!!!</P>' + markdown_content
                     except:
                         pass
@@ -1191,7 +1236,7 @@ async def get_notice(request):
 @PromptServer.instance.routes.get("/manager/reboot")
 def restart(self):
     if not is_allowed_security_level('middle'):
-        print(f"ERROR: To use this action, a security_level of `middle or below` is required.  Please contact the administrator.")
+        print(SECURITY_MESSAGE_MIDDLE_OR_BELOW)
         return web.Response(status=403)
 
     try:
@@ -1207,6 +1252,11 @@ def restart(self):
         exit(0)
 
     print(f"\nRestarting... [Legacy Mode]\n\n")
+
+    sys_argv = sys.argv.copy()
+    if '--windows-standalone-build' in sys_argv:
+        sys_argv.remove('--windows-standalone-build')
+
     if sys.platform.startswith('win32'):
         return os.execv(sys.executable, ['"' + sys.executable + '"', '"' + sys.argv[0] + '"'] + sys.argv[1:])
     else:
@@ -1271,389 +1321,6 @@ async def load_components(request):
         return web.Response(status=400)
 
 
-@PromptServer.instance.routes.get("/manager/share_option")
-async def share_option(request):
-    if "value" in request.rel_url.query:
-        core.get_config()['share_option'] = request.rel_url.query['value']
-        core.write_config()
-    else:
-        return web.Response(text=core.get_config()['share_option'], status=200)
-
-    return web.Response(status=200)
-
-
-def get_openart_auth():
-    if not os.path.exists(os.path.join(core.comfyui_manager_path, ".openart_key")):
-        return None
-    try:
-        with open(os.path.join(core.comfyui_manager_path, ".openart_key"), "r") as f:
-            openart_key = f.read().strip()
-        return openart_key if openart_key else None
-    except:
-        return None
-
-
-def get_matrix_auth():
-    if not os.path.exists(os.path.join(core.comfyui_manager_path, "matrix_auth")):
-        return None
-    try:
-        with open(os.path.join(core.comfyui_manager_path, "matrix_auth"), "r") as f:
-            matrix_auth = f.read()
-            homeserver, username, password = matrix_auth.strip().split("\n")
-            if not homeserver or not username or not password:
-                return None
-        return {
-            "homeserver": homeserver,
-            "username": username,
-            "password": password,
-        }
-    except:
-        return None
-
-
-def get_comfyworkflows_auth():
-    if not os.path.exists(os.path.join(core.comfyui_manager_path, "comfyworkflows_sharekey")):
-        return None
-    try:
-        with open(os.path.join(core.comfyui_manager_path, "comfyworkflows_sharekey"), "r") as f:
-            share_key = f.read()
-            if not share_key.strip():
-                return None
-        return share_key
-    except:
-        return None
-
-
-def get_youml_settings():
-    if not os.path.exists(os.path.join(core.comfyui_manager_path, ".youml")):
-        return None
-    try:
-        with open(os.path.join(core.comfyui_manager_path, ".youml"), "r") as f:
-            youml_settings = f.read().strip()
-        return youml_settings if youml_settings else None
-    except:
-        return None
-
-
-def set_youml_settings(settings):
-    with open(os.path.join(core.comfyui_manager_path, ".youml"), "w") as f:
-        f.write(settings)
-
-
-@PromptServer.instance.routes.get("/manager/get_openart_auth")
-async def api_get_openart_auth(request):
-    # print("Getting stored Matrix credentials...")
-    openart_key = get_openart_auth()
-    if not openart_key:
-        return web.Response(status=404)
-    return web.json_response({"openart_key": openart_key})
-
-
-@PromptServer.instance.routes.post("/manager/set_openart_auth")
-async def api_set_openart_auth(request):
-    json_data = await request.json()
-    openart_key = json_data['openart_key']
-    with open(os.path.join(core.comfyui_manager_path, ".openart_key"), "w") as f:
-        f.write(openart_key)
-    return web.Response(status=200)
-
-
-@PromptServer.instance.routes.get("/manager/get_matrix_auth")
-async def api_get_matrix_auth(request):
-    # print("Getting stored Matrix credentials...")
-    matrix_auth = get_matrix_auth()
-    if not matrix_auth:
-        return web.Response(status=404)
-    return web.json_response(matrix_auth)
-
-
-@PromptServer.instance.routes.get("/manager/youml/settings")
-async def api_get_youml_settings(request):
-    youml_settings = get_youml_settings()
-    if not youml_settings:
-        return web.Response(status=404)
-    return web.json_response(json.loads(youml_settings))
-
-
-@PromptServer.instance.routes.post("/manager/youml/settings")
-async def api_set_youml_settings(request):
-    json_data = await request.json()
-    set_youml_settings(json.dumps(json_data))
-    return web.Response(status=200)
-
-
-@PromptServer.instance.routes.get("/manager/get_comfyworkflows_auth")
-async def api_get_comfyworkflows_auth(request):
-    # Check if the user has provided Matrix credentials in a file called 'matrix_accesstoken'
-    # in the same directory as the ComfyUI base folder
-    # print("Getting stored Comfyworkflows.com auth...")
-    comfyworkflows_auth = get_comfyworkflows_auth()
-    if not comfyworkflows_auth:
-        return web.Response(status=404)
-    return web.json_response({"comfyworkflows_sharekey": comfyworkflows_auth})
-
-
-args.enable_cors_header = "*"
-if hasattr(PromptServer.instance, "app"):
-    app = PromptServer.instance.app
-    cors_middleware = server.create_cors_middleware(args.enable_cors_header)
-    app.middlewares.append(cors_middleware)
-
-
-@PromptServer.instance.routes.post("/manager/set_esheep_workflow_and_images")
-async def set_esheep_workflow_and_images(request):
-    json_data = await request.json()
-    current_workflow = json_data['workflow']
-    images = json_data['images']
-    with open(os.path.join(core.comfyui_manager_path, "esheep_share_message.json"), "w", encoding='utf-8') as file:
-        json.dump(json_data, file, indent=4)
-        return web.Response(status=200)
-
-
-@PromptServer.instance.routes.get("/manager/get_esheep_workflow_and_images")
-async def get_esheep_workflow_and_images(request):
-    with open(os.path.join(core.comfyui_manager_path, "esheep_share_message.json"), 'r', encoding='utf-8') as file:
-        data = json.load(file)
-        return web.Response(status=200, text=json.dumps(data))
-
-
-def set_matrix_auth(json_data):
-    homeserver = json_data['homeserver']
-    username = json_data['username']
-    password = json_data['password']
-    with open(os.path.join(core.comfyui_manager_path, "matrix_auth"), "w") as f:
-        f.write("\n".join([homeserver, username, password]))
-
-
-def set_comfyworkflows_auth(comfyworkflows_sharekey):
-    with open(os.path.join(core.comfyui_manager_path, "comfyworkflows_sharekey"), "w") as f:
-        f.write(comfyworkflows_sharekey)
-
-
-def has_provided_matrix_auth(matrix_auth):
-    return matrix_auth['homeserver'].strip() and matrix_auth['username'].strip() and matrix_auth['password'].strip()
-
-
-def has_provided_comfyworkflows_auth(comfyworkflows_sharekey):
-    return comfyworkflows_sharekey.strip()
-
-
-def extract_model_file_names(json_data):
-    """Extract unique file names from the input JSON data."""
-    file_names = set()
-    model_filename_extensions = {'.safetensors', '.ckpt', '.pt', '.pth', '.bin'}
-
-    # Recursively search for file names in the JSON data
-    def recursive_search(data):
-        if isinstance(data, dict):
-            for value in data.values():
-                recursive_search(value)
-        elif isinstance(data, list):
-            for item in data:
-                recursive_search(item)
-        elif isinstance(data, str) and '.' in data:
-            file_names.add(os.path.basename(data))  # file_names.add(data)
-
-    recursive_search(json_data)
-    return [f for f in list(file_names) if os.path.splitext(f)[1] in model_filename_extensions]
-
-
-def find_file_paths(base_dir, file_names):
-    """Find the paths of the files in the base directory."""
-    file_paths = {}
-
-    for root, dirs, files in os.walk(base_dir):
-        # Exclude certain directories
-        dirs[:] = [d for d in dirs if d not in ['.git']]
-
-        for file in files:
-            if file in file_names:
-                file_paths[file] = os.path.join(root, file)
-    return file_paths
-
-
-def compute_sha256_checksum(filepath):
-    """Compute the SHA256 checksum of a file, in chunks"""
-    sha256 = hashlib.sha256()
-    with open(filepath, 'rb') as f:
-        for chunk in iter(lambda: f.read(4096), b''):
-            sha256.update(chunk)
-    return sha256.hexdigest()
-
-
-@PromptServer.instance.routes.post("/manager/share")
-async def share_art(request):
-    # get json data
-    json_data = await request.json()
-
-    matrix_auth = json_data['matrix_auth']
-    comfyworkflows_sharekey = json_data['cw_auth']['cw_sharekey']
-
-    set_matrix_auth(matrix_auth)
-    set_comfyworkflows_auth(comfyworkflows_sharekey)
-
-    share_destinations = json_data['share_destinations']
-    credits = json_data['credits']
-    title = json_data['title']
-    description = json_data['description']
-    is_nsfw = json_data['is_nsfw']
-    prompt = json_data['prompt']
-    potential_outputs = json_data['potential_outputs']
-    selected_output_index = json_data['selected_output_index']
-
-    try:
-        output_to_share = potential_outputs[int(selected_output_index)]
-    except:
-        # for now, pick the first output
-        output_to_share = potential_outputs[0]
-
-    assert output_to_share['type'] in ('image', 'output')
-    output_dir = folder_paths.get_output_directory()
-
-    if output_to_share['type'] == 'image':
-        asset_filename = output_to_share['image']['filename']
-        asset_subfolder = output_to_share['image']['subfolder']
-
-        if output_to_share['image']['type'] == 'temp':
-            output_dir = folder_paths.get_temp_directory()
-    else:
-        asset_filename = output_to_share['output']['filename']
-        asset_subfolder = output_to_share['output']['subfolder']
-
-    if asset_subfolder:
-        asset_filepath = os.path.join(output_dir, asset_subfolder, asset_filename)
-    else:
-        asset_filepath = os.path.join(output_dir, asset_filename)
-
-    # get the mime type of the asset
-    assetFileType = mimetypes.guess_type(asset_filepath)[0]
-
-    share_website_host = "UNKNOWN"
-    if "comfyworkflows" in share_destinations:
-        share_website_host = "https://comfyworkflows.com"
-        share_endpoint = f"{share_website_host}/api"
-
-        # get presigned urls
-        async with aiohttp.ClientSession(trust_env=True, connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
-            async with session.post(
-                    f"{share_endpoint}/get_presigned_urls",
-                    json={
-                        "assetFileName": asset_filename,
-                        "assetFileType": assetFileType,
-                        "workflowJsonFileName": 'workflow.json',
-                        "workflowJsonFileType": 'application/json',
-                    },
-            ) as resp:
-                assert resp.status == 200
-                presigned_urls_json = await resp.json()
-                assetFilePresignedUrl = presigned_urls_json["assetFilePresignedUrl"]
-                assetFileKey = presigned_urls_json["assetFileKey"]
-                workflowJsonFilePresignedUrl = presigned_urls_json["workflowJsonFilePresignedUrl"]
-                workflowJsonFileKey = presigned_urls_json["workflowJsonFileKey"]
-
-        # upload asset
-        async with aiohttp.ClientSession(trust_env=True, connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
-            async with session.put(assetFilePresignedUrl, data=open(asset_filepath, "rb")) as resp:
-                assert resp.status == 200
-
-        # upload workflow json
-        async with aiohttp.ClientSession(trust_env=True, connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
-            async with session.put(workflowJsonFilePresignedUrl, data=json.dumps(prompt['workflow']).encode('utf-8')) as resp:
-                assert resp.status == 200
-
-        model_filenames = extract_model_file_names(prompt['workflow'])
-        model_file_paths = find_file_paths(folder_paths.base_path, model_filenames)
-
-        models_info = {}
-        for filename, filepath in model_file_paths.items():
-            models_info[filename] = {
-                "filename": filename,
-                "sha256_checksum": compute_sha256_checksum(filepath),
-                "relative_path": os.path.relpath(filepath, folder_paths.base_path),
-            }
-
-        # make a POST request to /api/upload_workflow with form data key values
-        async with aiohttp.ClientSession(trust_env=True, connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
-            form = aiohttp.FormData()
-            if comfyworkflows_sharekey:
-                form.add_field("shareKey", comfyworkflows_sharekey)
-            form.add_field("source", "comfyui_manager")
-            form.add_field("assetFileKey", assetFileKey)
-            form.add_field("assetFileType", assetFileType)
-            form.add_field("workflowJsonFileKey", workflowJsonFileKey)
-            form.add_field("sharedWorkflowWorkflowJsonString", json.dumps(prompt['workflow']))
-            form.add_field("sharedWorkflowPromptJsonString", json.dumps(prompt['output']))
-            form.add_field("shareWorkflowCredits", credits)
-            form.add_field("shareWorkflowTitle", title)
-            form.add_field("shareWorkflowDescription", description)
-            form.add_field("shareWorkflowIsNSFW", str(is_nsfw).lower())
-            form.add_field("currentSnapshot", json.dumps(core.get_current_snapshot()))
-            form.add_field("modelsInfo", json.dumps(models_info))
-
-            async with session.post(
-                    f"{share_endpoint}/upload_workflow",
-                    data=form,
-            ) as resp:
-                assert resp.status == 200
-                upload_workflow_json = await resp.json()
-                workflowId = upload_workflow_json["workflowId"]
-
-    # check if the user has provided Matrix credentials
-    if "matrix" in share_destinations:
-        comfyui_share_room_id = '!LGYSoacpJPhIfBqVfb:matrix.org'
-        filename = os.path.basename(asset_filepath)
-        content_type = assetFileType
-
-        try:
-            from matrix_client.api import MatrixHttpApi
-            from matrix_client.client import MatrixClient
-
-            homeserver = 'matrix.org'
-            if matrix_auth:
-                homeserver = matrix_auth.get('homeserver', 'matrix.org')
-            homeserver = homeserver.replace("http://", "https://")
-            if not homeserver.startswith("https://"):
-                homeserver = "https://" + homeserver
-
-            client = MatrixClient(homeserver)
-            try:
-                token = client.login(username=matrix_auth['username'], password=matrix_auth['password'])
-                if not token:
-                    return web.json_response({"error": "Invalid Matrix credentials."}, content_type='application/json', status=400)
-            except:
-                return web.json_response({"error": "Invalid Matrix credentials."}, content_type='application/json', status=400)
-
-            matrix = MatrixHttpApi(homeserver, token=token)
-            with open(asset_filepath, 'rb') as f:
-                mxc_url = matrix.media_upload(f.read(), content_type, filename=filename)['content_uri']
-
-            workflow_json_mxc_url = matrix.media_upload(prompt['workflow'], 'application/json', filename='workflow.json')['content_uri']
-
-            text_content = ""
-            if title:
-                text_content += f"{title}\n"
-            if description:
-                text_content += f"{description}\n"
-            if credits:
-                text_content += f"\ncredits: {credits}\n"
-            response = matrix.send_message(comfyui_share_room_id, text_content)
-            response = matrix.send_content(comfyui_share_room_id, mxc_url, filename, 'm.image')
-            response = matrix.send_content(comfyui_share_room_id, workflow_json_mxc_url, 'workflow.json', 'm.file')
-        except:
-            import traceback
-            traceback.print_exc()
-            return web.json_response({"error": "An error occurred when sharing your art to Matrix."}, content_type='application/json', status=500)
-
-    return web.json_response({
-        "comfyworkflows": {
-            "url": None if "comfyworkflows" not in share_destinations else f"{share_website_host}/workflows/{workflowId}",
-        },
-        "matrix": {
-            "success": None if "matrix" not in share_destinations else True
-        }
-    }, content_type='application/json', status=200)
-
-
 def sanitize(data):
     return data.replace("<", "&lt;").replace(">", "&gt;")
 
@@ -1713,6 +1380,6 @@ if not os.path.exists(core.config_path):
 cm_global.register_extension('ComfyUI-Manager',
                              {'version': core.version,
                                  'name': 'ComfyUI Manager',
-                                 'nodes': {'Terminal Log //CM'},
+                                 'nodes': {},
                                  'description': 'It provides the ability to manage custom nodes in ComfyUI.', })
 

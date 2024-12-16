@@ -204,7 +204,6 @@ This repository provides Colab notebooks that allow you to install and use Comfy
 * Please submit a pull request to update either the custom-node-list.json or model-list.json file.
 
 * The scanner currently provides a detection function for missing nodes, which is capable of detecting nodes described by the following two patterns.
-  * Or you can provide manually `node_list.json` file.
 
 ```
 NODE_CLASS_MAPPINGS = {
@@ -218,6 +217,7 @@ NODE_CLASS_MAPPINGS.update({
     "SemSegPreprocessor": Uniformer_SemSegPreprocessor,
 })
 ```
+  * Or you can provide manually `node_list.json` file.
 
 * When you write a docstring in the header of the .py file for the Node as follows, it will be used for managing the database in the Manager.
   * Currently, only the `nickname` is being used, but other parts will also be utilized in the future.
@@ -363,10 +363,10 @@ When you run the `scan.sh` script:
   * `high` level risky features
     * `Install via git url`, `pip install`
     * Installation of custom nodes registered not in the `default channel`.
-    * Display terminal log
+    * Fix custom nodes
   
   * `middle` level risky features
-    * Uninstall/Update/Fix custom nodes
+    * Uninstall/Update
     * Installation of custom nodes registered in the `default channel`.
     * Restore/Remove Snapshot
     * Restart
@@ -391,7 +391,6 @@ When you run the `scan.sh` script:
 * https://github.com/SimithWang/comfyui-renameImages
 * https://github.com/Tcheko243/ComfyUI-Photographer-Alpha7-Nodes
 * https://github.com/Limbicnation/ComfyUINodeToolbox
-* https://github.com/chenpipi0807/pip_longsize
 * https://github.com/APZmedia/ComfyUI-APZmedia-srtTools
 
 ## Roadmap
