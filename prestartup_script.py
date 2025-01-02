@@ -387,7 +387,7 @@ check_bypass_ssl()
 # Perform install
 processed_install = set()
 script_list_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "startup-scripts", "install-scripts.txt")
-pip_fixer = PIPFixer(get_installed_packages())
+# pip_fixer = PIPFixer(get_installed_packages())
 
 
 def is_installed(name):
@@ -433,90 +433,90 @@ def is_installed(name):
     return True       # prevent downgrade
 
 
-if os.path.exists(restore_snapshot_path):
-    try:
-        cloned_repos = []
+# if os.path.exists(restore_snapshot_path):
+#     try:
+#         cloned_repos = []
 
-        def msg_capture(stream, prefix):
-            stream.reconfigure(encoding=locale.getpreferredencoding(), errors='replace')
-            for msg in stream:
-                if msg.startswith("CLONE: "):
-                    cloned_repos.append(msg[7:])
-                    if prefix == '[!]':
-                        print(prefix, msg, end="", file=sys.stderr)
-                    else:
-                        print(prefix, msg, end="")
+#         def msg_capture(stream, prefix):
+#             stream.reconfigure(encoding=locale.getpreferredencoding(), errors='replace')
+#             for msg in stream:
+#                 if msg.startswith("CLONE: "):
+#                     cloned_repos.append(msg[7:])
+#                     if prefix == '[!]':
+#                         print(prefix, msg, end="", file=sys.stderr)
+#                     else:
+#                         print(prefix, msg, end="")
 
-                elif prefix == '[!]' and ('it/s]' in msg or 's/it]' in msg) and ('%|' in msg or 'it [' in msg):
-                    if msg.startswith('100%'):
-                        print('\r' + msg, end="", file=sys.stderr),
-                    else:
-                        print('\r'+msg[:-1], end="", file=sys.stderr),
-                else:
-                    if prefix == '[!]':
-                        print(prefix, msg, end="", file=sys.stderr)
-                    else:
-                        print(prefix, msg, end="")
+#                 elif prefix == '[!]' and ('it/s]' in msg or 's/it]' in msg) and ('%|' in msg or 'it [' in msg):
+#                     if msg.startswith('100%'):
+#                         print('\r' + msg, end="", file=sys.stderr),
+#                     else:
+#                         print('\r'+msg[:-1], end="", file=sys.stderr),
+#                 else:
+#                     if prefix == '[!]':
+#                         print(prefix, msg, end="", file=sys.stderr)
+#                     else:
+#                         print(prefix, msg, end="")
 
-        print(f"[ComfyUI-Manager] Restore snapshot.")
-        cmd_str = [sys.executable, git_script_path, '--apply-snapshot', restore_snapshot_path]
+#         print(f"[ComfyUI-Manager] Restore snapshot.")
+#         cmd_str = [sys.executable, git_script_path, '--apply-snapshot', restore_snapshot_path]
 
-        new_env = os.environ.copy()
-        new_env["COMFYUI_PATH"] = comfy_path
-        exit_code = process_wrap(cmd_str, custom_nodes_path, handler=msg_capture, env=new_env)
+#         new_env = os.environ.copy()
+#         new_env["COMFYUI_PATH"] = comfy_path
+#         exit_code = process_wrap(cmd_str, custom_nodes_path, handler=msg_capture, env=new_env)
 
-        repository_name = ''
-        for url in cloned_repos:
-            try:
-                repository_name = url.split("/")[-1].strip()
-                repo_path = os.path.join(custom_nodes_path, repository_name)
-                repo_path = os.path.abspath(repo_path)
+#         repository_name = ''
+#         for url in cloned_repos:
+#             try:
+#                 repository_name = url.split("/")[-1].strip()
+#                 repo_path = os.path.join(custom_nodes_path, repository_name)
+#                 repo_path = os.path.abspath(repo_path)
 
-                requirements_path = os.path.join(repo_path, 'requirements.txt')
-                install_script_path = os.path.join(repo_path, 'install.py')
+#                 requirements_path = os.path.join(repo_path, 'requirements.txt')
+#                 install_script_path = os.path.join(repo_path, 'install.py')
 
-                this_exit_code = 0
+#                 this_exit_code = 0
 
-                if os.path.exists(requirements_path):
-                    with open(requirements_path, 'r', encoding="UTF-8", errors="ignore") as file:
-                        for line in file:
-                            package_name = remap_pip_package(line.strip())
-                            if package_name and not is_installed(package_name):
-                                if not package_name.startswith('#'):
-                                    if '--index-url' in package_name:
-                                        s = package_name.split('--index-url')
-                                        install_cmd = [sys.executable, "-m", "pip", "install", s[0].strip(), '--index-url', s[1].strip()]
-                                    else:
-                                        install_cmd = [sys.executable, "-m", "pip", "install", package_name]
+#                 if os.path.exists(requirements_path):
+#                     with open(requirements_path, 'r', encoding="UTF-8", errors="ignore") as file:
+#                         for line in file:
+#                             package_name = remap_pip_package(line.strip())
+#                             if package_name and not is_installed(package_name):
+#                                 if not package_name.startswith('#'):
+#                                     if '--index-url' in package_name:
+#                                         s = package_name.split('--index-url')
+#                                         install_cmd = [sys.executable, "-m", "pip", "install", s[0].strip(), '--index-url', s[1].strip()]
+#                                     else:
+#                                         install_cmd = [sys.executable, "-m", "pip", "install", package_name]
 
-                                    this_exit_code += process_wrap(install_cmd, repo_path)
+#                                     this_exit_code += process_wrap(install_cmd, repo_path)
 
-                if os.path.exists(install_script_path) and f'{repo_path}/install.py' not in processed_install:
-                    processed_install.add(f'{repo_path}/install.py')
-                    install_cmd = [sys.executable, install_script_path]
-                    print(f">>> {install_cmd} / {repo_path}")
+#                 if os.path.exists(install_script_path) and f'{repo_path}/install.py' not in processed_install:
+#                     processed_install.add(f'{repo_path}/install.py')
+#                     install_cmd = [sys.executable, install_script_path]
+#                     print(f">>> {install_cmd} / {repo_path}")
 
-                    new_env = os.environ.copy()
-                    new_env["COMFYUI_PATH"] = comfy_path
-                    this_exit_code += process_wrap(install_cmd, repo_path, env=new_env)
+#                     new_env = os.environ.copy()
+#                     new_env["COMFYUI_PATH"] = comfy_path
+#                     this_exit_code += process_wrap(install_cmd, repo_path, env=new_env)
 
-                if this_exit_code != 0:
-                    print(f"[ComfyUI-Manager] Restoring '{repository_name}' is failed.")
+#                 if this_exit_code != 0:
+#                     print(f"[ComfyUI-Manager] Restoring '{repository_name}' is failed.")
 
-            except Exception as e:
-                print(e)
-                print(f"[ComfyUI-Manager] Restoring '{repository_name}' is failed.")
+#             except Exception as e:
+#                 print(e)
+#                 print(f"[ComfyUI-Manager] Restoring '{repository_name}' is failed.")
 
-        if exit_code != 0:
-            print(f"[ComfyUI-Manager] Restore snapshot failed.")
-        else:
-            print(f"[ComfyUI-Manager] Restore snapshot done.")
+#         if exit_code != 0:
+#             print(f"[ComfyUI-Manager] Restore snapshot failed.")
+#         else:
+#             print(f"[ComfyUI-Manager] Restore snapshot done.")
 
-    except Exception as e:
-        print(e)
-        print(f"[ComfyUI-Manager] Restore snapshot failed.")
+#     except Exception as e:
+#         print(e)
+#         print(f"[ComfyUI-Manager] Restore snapshot failed.")
 
-    os.remove(restore_snapshot_path)
+#     os.remove(restore_snapshot_path)
 
 
 def execute_lazy_install_script(repo_path, executable):
@@ -550,81 +550,81 @@ def execute_lazy_install_script(repo_path, executable):
 
 
 # Check if script_list_path exists
-if os.path.exists(script_list_path):
-    print("\n#######################################################################")
-    print("[ComfyUI-Manager] Starting dependency installation/(de)activation for the extension\n")
+# if os.path.exists(script_list_path):
+#     print("\n#######################################################################")
+#     print("[ComfyUI-Manager] Starting dependency installation/(de)activation for the extension\n")
 
-    executed = set()
-    # Read each line from the file and convert it to a list using eval
-    with open(script_list_path, 'r', encoding="UTF-8", errors="ignore") as file:
-        for line in file:
-            if line in executed:
-                continue
+#     executed = set()
+#     # Read each line from the file and convert it to a list using eval
+#     with open(script_list_path, 'r', encoding="UTF-8", errors="ignore") as file:
+#         for line in file:
+#             if line in executed:
+#                 continue
 
-            executed.add(line)
+#             executed.add(line)
 
-            try:
-                script = ast.literal_eval(line)
+#             try:
+#                 script = ast.literal_eval(line)
 
-                if script[1].startswith('#') and script[1] != '#FORCE':
-                    if script[1] == "#LAZY-INSTALL-SCRIPT":
-                        execute_lazy_install_script(script[0], script[2])
+#                 if script[1].startswith('#') and script[1] != '#FORCE':
+#                     if script[1] == "#LAZY-INSTALL-SCRIPT":
+#                         execute_lazy_install_script(script[0], script[2])
 
-                elif os.path.exists(script[0]):
-                    if script[1] == "#FORCE":
-                        del script[1]
-                    else:
-                        if 'pip' in script[1:] and 'install' in script[1:] and is_installed(script[-1]):
-                            continue
+#                 elif os.path.exists(script[0]):
+#                     if script[1] == "#FORCE":
+#                         del script[1]
+#                     else:
+#                         if 'pip' in script[1:] and 'install' in script[1:] and is_installed(script[-1]):
+#                             continue
 
-                    print(f"\n## ComfyUI-Manager: EXECUTE => {script[1:]}")
-                    print(f"\n## Execute install/(de)activation script for '{script[0]}'")
+#                     print(f"\n## ComfyUI-Manager: EXECUTE => {script[1:]}")
+#                     print(f"\n## Execute install/(de)activation script for '{script[0]}'")
 
-                    new_env = os.environ.copy()
-                    new_env["COMFYUI_PATH"] = comfy_path
-                    exit_code = process_wrap(script[1:], script[0], env=new_env)
+#                     new_env = os.environ.copy()
+#                     new_env["COMFYUI_PATH"] = comfy_path
+#                     exit_code = process_wrap(script[1:], script[0], env=new_env)
 
-                    if exit_code != 0:
-                        print(f"install/(de)activation script failed: {script[0]}")
-                else:
-                    print(f"\n## ComfyUI-Manager: CANCELED => {script[1:]}")
+#                     if exit_code != 0:
+#                         print(f"install/(de)activation script failed: {script[0]}")
+#                 else:
+#                     print(f"\n## ComfyUI-Manager: CANCELED => {script[1:]}")
 
-            except Exception as e:
-                print(f"[ERROR] Failed to execute install/(de)activation script: {line} / {e}")
+#             except Exception as e:
+#                 print(f"[ERROR] Failed to execute install/(de)activation script: {line} / {e}")
 
-    # Remove the script_list_path file
-    if os.path.exists(script_list_path):
-        os.remove(script_list_path)
+#     # Remove the script_list_path file
+#     if os.path.exists(script_list_path):
+#         os.remove(script_list_path)
         
-    print("\n[ComfyUI-Manager] Startup script completed.")
-    print("#######################################################################\n")
+#     print("\n[ComfyUI-Manager] Startup script completed.")
+#     print("#######################################################################\n")
 
-pip_fixer.fix_broken()
+# pip_fixer.fix_broken()
 
-del processed_install
-del pip_fixer
-clear_pip_cache()
-
-
-def check_windows_event_loop_policy():
-    try:
-        import configparser
-        config_path = os.path.join(os.path.dirname(__file__), "config.ini")
-        config = configparser.ConfigParser()
-        config.read(config_path)
-        default_conf = config['default']
-
-        if 'windows_selector_event_loop_policy' in default_conf and default_conf['windows_selector_event_loop_policy'].lower() == 'true':
-            try:
-                import asyncio
-                import asyncio.windows_events
-                asyncio.set_event_loop_policy(asyncio.windows_events.WindowsSelectorEventLoopPolicy())
-                print(f"[ComfyUI-Manager] Windows event loop policy mode enabled")
-            except Exception as e:
-                print(f"[ComfyUI-Manager] WARN: Windows initialization fail: {e}")
-    except Exception:
-        pass
+# del processed_install
+# del pip_fixer
+# clear_pip_cache()
 
 
-if platform.system() == 'Windows':
-    check_windows_event_loop_policy()
+# def check_windows_event_loop_policy():
+#     try:
+#         import configparser
+#         config_path = os.path.join(os.path.dirname(__file__), "config.ini")
+#         config = configparser.ConfigParser()
+#         config.read(config_path)
+#         default_conf = config['default']
+
+#         if 'windows_selector_event_loop_policy' in default_conf and default_conf['windows_selector_event_loop_policy'].lower() == 'true':
+#             try:
+#                 import asyncio
+#                 import asyncio.windows_events
+#                 asyncio.set_event_loop_policy(asyncio.windows_events.WindowsSelectorEventLoopPolicy())
+#                 print(f"[ComfyUI-Manager] Windows event loop policy mode enabled")
+#             except Exception as e:
+#                 print(f"[ComfyUI-Manager] WARN: Windows initialization fail: {e}")
+#     except Exception:
+#         pass
+
+
+# if platform.system() == 'Windows':
+#     check_windows_event_loop_policy()
