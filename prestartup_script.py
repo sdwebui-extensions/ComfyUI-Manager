@@ -10,6 +10,7 @@ import platform
 import json
 import ast
 import logging
+from server import PromptServer
 
 glob_path = os.path.join(os.path.dirname(__file__), "glob")
 sys.path.append(glob_path)
@@ -232,8 +233,10 @@ try:
                 timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
                 if self.last_char != '\n':
                     log_file.write(message)
+                    PromptServer.instance.send_sync("run-log", {"log": message})
                 else:
                     log_file.write(f"[{timestamp}] {message}")
+                    PromptServer.instance.send_sync("run-log", {"log": f"[{timestamp}] {message}"})
                 log_file.flush()
                 self.last_char = message if message == '' else message[-1]
 
