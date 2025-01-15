@@ -10,7 +10,6 @@ import platform
 import json
 import ast
 import logging
-from server import PromptServer
 
 glob_path = os.path.join(os.path.dirname(__file__), "glob")
 sys.path.append(glob_path)
@@ -147,7 +146,6 @@ try:
     # Logger setup
     if enable_file_logging:
         if os.path.exists(f"comfyui{postfix}.log"):
-            os.remove(f"comfyui{postfix}.log")
             if os.path.exists(f"comfyui{postfix}.prev.log"):
                 if os.path.exists(f"comfyui{postfix}.prev2.log"):
                     os.remove(f"comfyui{postfix}.prev2.log")
@@ -230,13 +228,18 @@ try:
 
         def sync_write(self, message, file_only=False):
             with log_lock:
+                from server import PromptServer
                 timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
                 if self.last_char != '\n':
                     log_file.write(message)
-                    PromptServer.instance.send_sync("run-log", {"log": message})
+                    if hasattr(PromptServer, "instance"):
+                        PromptServer.instance.send_sync("run-log", {"log": message}, PromptServer.instance.client_id)
+                        print('send sync')
                 else:
                     log_file.write(f"[{timestamp}] {message}")
-                    PromptServer.instance.send_sync("run-log", {"log": f"[{timestamp}] {message}"})
+                    if hasattr(PromptServer, "instance"):
+                        PromptServer.instance.send_sync("run-log", {"log": f"[{timestamp}] {message}"}, PromptServer.instance.client_id)
+                        print('send sync')
                 log_file.flush()
                 self.last_char = message if message == '' else message[-1]
 
