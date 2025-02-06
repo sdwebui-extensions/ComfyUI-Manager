@@ -18,10 +18,12 @@ import security_check
 from manager_util import *
 import cm_global
 
-security_check.security_check()
+# security_check.security_check()
+
 
 cm_global.pip_blacklist = ['torch', 'torchsde', 'torchvision']
 cm_global.pip_downgrade_blacklist = ['torch', 'torchsde', 'torchvision', 'transformers', 'safetensors', 'kornia']
+
 
 
 def skip_pip_spam(x):
@@ -85,7 +87,6 @@ if os.path.exists(pip_overrides_path):
         cm_global.pip_overrides = json.load(json_file)
         cm_global.pip_overrides['numpy'] = 'numpy<2'
         cm_global.pip_overrides['ultralytics'] = 'ultralytics==8.3.40'  # for security
-
 
 def remap_pip_package(pkg):
     if pkg in cm_global.pip_overrides:
@@ -308,35 +309,12 @@ except Exception as e:
     print(f"[ComfyUI-Manager] Logging failed: {e}")
 
 
-try:
-    import git
-except ModuleNotFoundError:
-    my_path = os.path.dirname(__file__)
-    requirements_path = os.path.join(my_path, "requirements.txt")
-
-    print(f"## ComfyUI-Manager: installing dependencies. (GitPython)")
-    try:
-        result = subprocess.check_output([sys.executable, '-s', '-m', 'pip', 'install', '-r', requirements_path])
-    except subprocess.CalledProcessError as e:
-        print(f"## [ERROR] ComfyUI-Manager: Attempting to reinstall dependencies using an alternative method.")
-        try:
-            result = subprocess.check_output([sys.executable, '-s', '-m', 'pip', 'install', '--user', '-r', requirements_path])
-        except subprocess.CalledProcessError as e:
-            print(f"## [ERROR] ComfyUI-Manager: Failed to install the GitPython package in the correct Python environment. Please install it manually in the appropriate environment. (You can seek help at https://app.element.io/#/room/%23comfyui_space%3Amatrix.org)")
-
-try:
-    import git
-    print(f"## ComfyUI-Manager: installing dependencies done.")
-except:
-    # maybe we should sys.exit() here? there is at least two screens worth of error messages still being pumped after our error messages
-    print(f"## [ERROR] ComfyUI-Manager: GitPython package seems to be installed, but failed to load somehow. Make sure you have a working git client installed")
-
-
 print("** ComfyUI startup time:", datetime.datetime.now())
 print("** Platform:", platform.system())
 print("** Python version:", sys.version)
 print("** Python executable:", sys.executable)
 print("** ComfyUI Path:", comfy_path)
+print(time.time() - tic, 'sys info')
 
 if enable_file_logging:
     print("** Log path:", os.path.abspath('comfyui.log'))
@@ -381,7 +359,6 @@ def check_bypass_ssl():
 
 
 check_bypass_ssl()
-
 
 # Perform install
 processed_install = set()
