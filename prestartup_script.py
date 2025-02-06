@@ -314,7 +314,6 @@ print("** Platform:", platform.system())
 print("** Python version:", sys.version)
 print("** Python executable:", sys.executable)
 print("** ComfyUI Path:", comfy_path)
-print(time.time() - tic, 'sys info')
 
 if enable_file_logging:
     print("** Log path:", os.path.abspath('comfyui.log'))
