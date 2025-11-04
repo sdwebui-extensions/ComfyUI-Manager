@@ -41,6 +41,7 @@ import manager_util
 import git_utils
 import manager_downloader
 from node_package import InstalledNodePackage
+from comfy.cli_args import args
 
 
 version_code = [3, 37]
@@ -63,7 +64,7 @@ def get_default_custom_nodes_path():
     if default_custom_nodes_path is None:
         try:
             import folder_paths
-            default_custom_nodes_path = folder_paths.get_folder_paths("custom_nodes")[0]
+            default_custom_nodes_path = os.path.join(args.data_dir, "custom_nodes") # folder_paths.get_folder_paths("custom_nodes")[0]
         except:
             default_custom_nodes_path = os.path.abspath(os.path.join(manager_util.comfyui_manager_path, '..'))
 

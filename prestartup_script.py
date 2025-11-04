@@ -20,6 +20,7 @@ import manager_util
 import cm_global
 import manager_downloader
 import folder_paths
+from comfy.cli_args import args
 
 manager_util.add_python_path_to_env()
 
@@ -85,7 +86,7 @@ cm_global.register_api('cm.is_import_failed_extension', is_import_failed_extensi
 
 comfyui_manager_path = os.path.abspath(os.path.dirname(__file__))
 
-custom_nodes_base_path = folder_paths.get_folder_paths('custom_nodes')[0]
+custom_nodes_base_path = os.path.join(args.data_dir, "custom_nodes") # folder_paths.get_folder_paths('custom_nodes')[0]
 manager_files_path = os.path.abspath(os.path.join(folder_paths.get_user_directory(), 'default', 'ComfyUI-Manager'))
 manager_pip_overrides_path = os.path.join(manager_files_path, "pip_overrides.json")
 manager_pip_blacklist_path = os.path.join(manager_files_path, "pip_blacklist.list")

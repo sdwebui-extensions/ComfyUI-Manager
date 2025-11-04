@@ -1300,9 +1300,9 @@ async def fix_custom_node(request):
 
 @routes.post("/customnode/install/git_url")
 async def install_custom_node_git_url(request):
-    if not is_allowed_security_level('high'):
-        logging.error(SECURITY_MESSAGE_NORMAL_MINUS)
-        return web.Response(status=403)
+    # if not is_allowed_security_level('high'):
+    #     logging.error(SECURITY_MESSAGE_NORMAL_MINUS)
+    #     return web.Response(status=403)
 
     url = await request.text()
     res = await core.gitclone_install(url)
