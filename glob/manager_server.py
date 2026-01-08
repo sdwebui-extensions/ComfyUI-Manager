@@ -1822,7 +1822,7 @@ async def default_cache_update():
                     logging.info(f"[ComfyUI-Manager] default cache updated: {uri}")
         except Exception as e:
             logging.error(f"[ComfyUI-Manager] Failed to perform initial fetching '{filename}': {e}")
-            traceback.print_exc()
+            # traceback.print_exc()
 
     if core.get_config()['network_mode'] != 'offline':
         a = get_cache("custom-node-list.json")

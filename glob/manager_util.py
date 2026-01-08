@@ -183,7 +183,7 @@ async def get_data(uri, silent=False):
         print(f"FETCH DATA from: {uri}", end="")
 
     if uri.startswith("http"):
-        async with aiohttp.ClientSession(trust_env=True, connector=aiohttp.TCPConnector(verify_ssl=not bypass_ssl)) as session:
+        async with aiohttp.ClientSession(trust_env=True, connector=aiohttp.TCPConnector(verify_ssl=not bypass_ssl), timeout=5) as session:
             headers = {
                 'Cache-Control': 'no-cache',
                 'Pragma': 'no-cache',
